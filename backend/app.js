@@ -74,28 +74,6 @@ app.use((req, res) => {
 	res.status(404).json({ message: "Route not found" });
 });
 
-// Self-ping function to keep the server alive
-const PING_INTERVAL = 30000; // 30 seconds
-
-function pingServer() {
-	const healthCheckUrl = `${process.env.BACKEND_URL}/api/health-check`;
-	console.log(`Performing health check on: ${healthCheckUrl}`);
-
-	axios
-		.get(healthCheckUrl)
-		.then((response) => {
-			console.log(
-				`Health check at ${new Date().toISOString()}: Status ${response.status}`
-			);
-		})
-		.catch((error) => {
-			console.error(
-				`Health check failed at ${new Date().toISOString()}:`,
-				error.message
-			);
-		});
-}
-
 // Start server function
 async function startServer() {
 	try {
@@ -103,7 +81,20 @@ async function startServer() {
 
 		server.listen(PORT, () => {
 			console.log(`Server running on port ${PORT}`);
-			setInterval(pingServer, PING_INTERVAL);
+
+			// Only start health checks in production
+			if (process.env.NODE_ENV === "production") {
+				const PING_INTERVAL = 30000;
+				setInterval(() => {
+					const healthCheckUrl = `${process.env.BACKEND_URL}/api/health-check`;
+					axios
+						.get(healthCheckUrl)
+						.then((response) => console.log("Health check OK"))
+						.catch((error) =>
+							console.error("Health check failed:", error.message)
+						);
+				}, PING_INTERVAL);
+			}
 		});
 
 		// Graceful shutdown

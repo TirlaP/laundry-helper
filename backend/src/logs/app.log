@@ -3,3 +3,89 @@
 "ORD1729771223605","N/A","Shower Curtains Set",1,11.42,11.42,"Bathroom"
 "ORD1729771223605","N/A","Bed Skirt King",2,20.57,41.14,"Bed Skirts"
 "ORD1729771223605","N/A","Protector King",4,2.24,8.96,"Protectors"
+[2024-10-24T13:26:56.169Z] GET /api/orders
+[2024-10-24T13:26:56.169Z] Response: 304 
+[2024-10-24T13:26:56.219Z] GET /api/orders
+[2024-10-24T13:26:56.219Z] Response: 304 
+[2024-10-24T13:26:56.854Z] GET /api/products
+[2024-10-24T13:26:56.854Z] Response: 304 
+[2024-10-24T13:26:56.867Z] GET /api/products
+[2024-10-24T13:26:56.867Z] Response: 304 
+[2024-10-24T13:26:58.318Z] GET /api/products
+[2024-10-24T13:26:58.318Z] Response: 304 
+[2024-10-24T13:26:58.328Z] GET /api/products
+[2024-10-24T13:26:58.328Z] Response: 304 
+[2024-10-24T13:27:24.436Z] GET /api/products
+[2024-10-24T13:27:24.436Z] Response: 304 
+[2024-10-24T13:27:24.446Z] GET /api/products
+[2024-10-24T13:27:24.446Z] Response: 304 
+[2024-10-24T13:38:52.497Z] GET /api/products
+[2024-10-24T13:38:52.497Z] Response: 401 {"message":"User not found"}
+[2024-10-24T13:38:52.731Z] GET /api/products
+[2024-10-24T13:38:52.731Z] Response: 401 {"message":"User not found"}
+[2024-10-24T13:38:56.177Z] POST /api/auth/login
+[2024-10-24T13:38:56.177Z] Response: 400 {"message":"User not found"}
+[2024-10-24T13:39:02.944Z] POST /api/auth/register
+[2024-10-24T13:39:02.944Z] Response: 201 {"message":"User created successfully","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MWE0ZGY3N2Y1YjUxOGQwZDA3YjI3YiIsImlhdCI6MTcyOTc3NzE0MywiZXhwIjoxNzI5ODYzNTQzfQ.ntqamiRNqXBHzRIxJ4KOC0mCto8A5-Wg7h_S663Xs1I"}
+[2024-10-24T13:39:03.732Z] GET /api/orders
+[2024-10-24T13:39:03.732Z] Response: 200 []
+[2024-10-24T13:39:04.132Z] GET /api/orders
+[2024-10-24T13:39:04.132Z] Response: 304 
+[2024-10-24T13:42:18.567Z] GET /api/orders
+[2024-10-24T13:42:18.567Z] Response: 401 {"message":"User not found"}
+[2024-10-24T13:42:18.765Z] GET /api/orders
+[2024-10-24T13:42:18.765Z] Response: 401 {"message":"User not found"}
+[2024-10-24T13:42:21.895Z] POST /api/auth/login
+[2024-10-24T13:42:21.895Z] Response: 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MWEyNWJmYjQxOTU4MTA3YzFhNDI5OSIsImlhdCI6MTcyOTc3NzM0MiwiZXhwIjoxNzI5ODYzNzQyfQ.4gXqCRl3NgozFpAm-l6LYOWWU6apbdmzFkO8Td97Di4"}
+[2024-10-24T13:42:22.440Z] GET /api/orders
+[2024-10-24T13:42:22.440Z] Response: 200 []
+[2024-10-24T13:42:22.831Z] GET /api/orders
+[2024-10-24T13:42:22.831Z] Response: 304 
+[2024-10-24T13:42:26.741Z] GET /api/products
+[2024-10-24T13:42:26.741Z] Response: 200 [{"_id":"671a32bdd291d11dd21327eb","name":"Shower Curtains Set","nameEs":"Juego de Cortinas de Ducha","price":11.42,"category":"Bathroom","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327e8","name":"Bed Skirt King","nameEs":"Falda de Cama King","price":20.57,"category":"Bed Skirts","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327e9","name":"Bed Skirt Queen","nameEs":"Falda de Cama Queen","price":17.14,"category":"Bed Skirts","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327ea","name":"Bed Skirt Twin","nameEs":"Falda de Cama Twin","price":14.28,"category":"Bed Skirts","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327db","name":"Blanket King","nameEs":"Manta King","price":18.28,"category":"Blankets","createdAt":"2024-10-24T11:42:53.663Z","__v":0},{"_id":"671a32bdd291d11dd21327dc","name":"Blanket Queen","nameEs":"Manta Queen","price":16,"category":"Blankets","createdAt":"2024-10-24T11:42:53.663Z","__v":0},{"_id":"671a32bdd291d11dd21327dd","name":"Blanket Twin","nameEs":"Manta Twin","price":13.72,"category":"Blankets","createdAt":"2024-10-24T11:42:53.663Z","__v":0},{"_id":"671a32bdd291d11dd21327de","name":"Throws","nameEs":"Cobijas","price":9.94,"category":"Blankets","createdAt":"2024-10-24T11:42:53.663Z","__v":0},{"_id":"671a32bdd291d11dd21327e2","name":"Comforter/Duvet Insert King","nameEs":"Edredón King","price":41.14,"category":"Comforters","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327e3","name":"Comforter/Duvet Insert Queen","nameEs":"Edredón Queen","price":36.56,"category":"Comforters","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327e4","name":"Comforter/Duvet Insert Twin","nameEs":"Edredón Twin","price":27.42,"category":"Comforters","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f4","name":"Curtains Per SQ/FT","nameEs":"Cortinas Por Pie Cuadrado","price":3.28,"category":"Curtains","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f5","name":"Curtains Set","nameEs":"Juego de Cortinas","price":7.54,"category":"Curtains","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f6","name":"Panels and Curtains Each","nameEs":"Paneles y Cortinas Individual","price":4.48,"category":"Curtains","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327df","name":"Duvet Cover King","nameEs":"Funda Nórdica King","price":27.42,"category":"Duvet Covers","createdAt":"2024-10-24T11:42:53.663Z","__v":0},{"_id":"671a32bdd291d11dd21327e0","name":"Duvet Cover Queen","nameEs":"Funda Nórdica Queen","price":20.57,"category":"Duvet Covers","createdAt":"2024-10-24T11:42:53.663Z","__v":0},{"_id":"671a32bdd291d11dd21327e1","name":"Duvet Cover Twin","nameEs":"Funda Nórdica Twin","price":16,"category":"Duvet Covers","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327ee","name":"Cloth Napkins","nameEs":"Servilletas de Tela","price":2.28,"category":"Kitchen","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327ec","name":"Placemats & Hotpads","nameEs":"Manteles Individuales y Agarraderas","price":2.28,"category":"Kitchen","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327ed","name":"Runners & Aprons","nameEs":"Caminos de Mesa y Delantales","price":2.28,"category":"Kitchen","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327d8","name":"Mattress Pad King","nameEs":"Protector de Colchón King","price":18.29,"category":"Mattress Pads","createdAt":"2024-10-24T11:42:53.662Z","__v":0},{"_id":"671a32bdd291d11dd21327d9","name":"Mattress Pad Queen","nameEs":"Protector de Colchón Queen","price":16,"category":"Mattress Pads","createdAt":"2024-10-24T11:42:53.663Z","__v":0},{"_id":"671a32bdd291d11dd21327da","name":"Mattress Pad Twin","nameEs":"Protector de Colchón Twin","price":13.72,"category":"Mattress Pads","createdAt":"2024-10-24T11:42:53.663Z","__v":0},{"_id":"671a32bdd291d11dd21327fb","name":"Decorative Pillow","nameEs":"Almohada Decorativa","price":6.37,"category":"Miscellaneous","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f7","name":"Robes","nameEs":"Batas","price":5.47,"category":"Miscellaneous","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f8","name":"Towels","nameEs":"Toallas","price":5.47,"category":"Miscellaneous","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327e5","name":"Pillow Sham King","nameEs":"Funda de Almohada Decorativa King","price":6.85,"category":"Pillow Shams","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327e7","name":"Pillow Sham Small","nameEs":"Funda de Almohada Decorativa Pequeña","price":5.71,"category":"Pillow Shams","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327e6","name":"Pillow Sham Standard","nameEs":"Funda de Almohada Decorativa Estándar","price":6.85,"category":"Pillow Shams","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327fa","name":"Protector King","nameEs":"Protector King","price":2.24,"category":"Protectors","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f9","name":"Protector Standard","nameEs":"Protector Estándar","price":1.87,"category":"Protectors","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f0","name":"Rug/Bathmat Large","nameEs":"Alfombra/Tapete de Baño Grande","price":8.05,"category":"Rugs","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327ef","name":"Rug/Bathmat Standard","nameEs":"Alfombra/Tapete de Baño Estándar","price":6.77,"category":"Rugs","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f1","name":"Rug/Bathmat X-Large","nameEs":"Alfombra/Tapete de Baño Extra Grande","price":23.93,"category":"Rugs","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327fd","name":"Minimum Mending Or Ironing Charge","nameEs":"Cargo Mínimo por Reparación o Planchado","price":28.81,"category":"Services","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327fc","name":"Price per Pound","nameEs":"Precio por Libra","price":3,"category":"Services","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f3","name":"Table Cloth Large","nameEs":"Mantel Grande","price":18.29,"category":"Table Cloths","createdAt":"2024-10-24T11:42:53.664Z","__v":0},{"_id":"671a32bdd291d11dd21327f2","name":"Table Cloth Small","nameEs":"Mantel Pequeño","price":10.28,"category":"Table Cloths","createdAt":"2024-10-24T11:42:53.664Z","__v":0}]
+[2024-10-24T13:42:27.142Z] GET /api/products
+[2024-10-24T13:42:27.142Z] Response: 304 
+[2024-10-24T13:42:38.961Z] GET /api/orders
+[2024-10-24T13:42:38.961Z] Response: 304 
+[2024-10-24T13:42:39.362Z] GET /api/orders
+[2024-10-24T13:42:39.362Z] Response: 304 
+[2024-10-24T13:42:43.776Z] GET /api/products
+[2024-10-24T13:42:43.776Z] Response: 304 
+[2024-10-24T13:42:44.173Z] GET /api/products
+[2024-10-24T13:42:44.173Z] Response: 304 
+[2024-10-24T13:42:48.102Z] POST /api/orders
+[2024-10-24T13:42:48.102Z] Response: 201 {"orderNumber":"ORD1729777368491","user":"671a25bfb41958107c1a4299","items":[{"product":{"_id":"671a32bdd291d11dd21327eb","name":"Shower Curtains Set","nameEs":"Juego de Cortinas de Ducha","price":11.42,"category":"Bathroom","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Shower Curtains Set","quantity":2,"price":11.42,"_id":"671a4ed87f5b518d0d07b298"},{"product":{"_id":"671a32bdd291d11dd21327e8","name":"Bed Skirt King","nameEs":"Falda de Cama King","price":20.57,"category":"Bed Skirts","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Bed Skirt King","quantity":1,"price":20.57,"_id":"671a4ed87f5b518d0d07b299"}],"total":43.41,"_id":"671a4ed87f5b518d0d07b297","createdAt":"2024-10-24T13:42:48.505Z","__v":0}
+[2024-10-24T13:42:48.939Z] GET /api/orders
+[2024-10-24T13:42:48.939Z] Response: 200 [{"_id":"671a4ed87f5b518d0d07b297","orderNumber":"ORD1729777368491","user":"671a25bfb41958107c1a4299","items":[{"product":{"_id":"671a32bdd291d11dd21327eb","name":"Shower Curtains Set","nameEs":"Juego de Cortinas de Ducha","price":11.42,"category":"Bathroom","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Shower Curtains Set","quantity":2,"price":11.42,"_id":"671a4ed87f5b518d0d07b298"},{"product":{"_id":"671a32bdd291d11dd21327e8","name":"Bed Skirt King","nameEs":"Falda de Cama King","price":20.57,"category":"Bed Skirts","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Bed Skirt King","quantity":1,"price":20.57,"_id":"671a4ed87f5b518d0d07b299"}],"total":43.41,"createdAt":"2024-10-24T13:42:48.505Z","__v":0}]
+[2024-10-24T13:42:49.531Z] GET /api/orders
+[2024-10-24T13:42:49.531Z] Response: 304 
+[2024-10-24T13:42:50.972Z] GET /api/products
+[2024-10-24T13:42:50.972Z] Response: 304 
+[2024-10-24T13:42:51.368Z] GET /api/products
+[2024-10-24T13:42:51.368Z] Response: 304 
+[2024-10-24T13:42:56.757Z] POST /api/orders
+[2024-10-24T13:42:56.757Z] Response: 201 {"name":"Asa da","orderNumber":"ORD1729777377147","user":"671a25bfb41958107c1a4299","items":[{"product":{"_id":"671a32bdd291d11dd21327eb","name":"Shower Curtains Set","nameEs":"Juego de Cortinas de Ducha","price":11.42,"category":"Bathroom","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Shower Curtains Set","quantity":2,"price":11.42,"_id":"671a4ee17f5b518d0d07b2ae"},{"product":{"_id":"671a32bdd291d11dd21327e8","name":"Bed Skirt King","nameEs":"Falda de Cama King","price":20.57,"category":"Bed Skirts","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Bed Skirt King","quantity":3,"price":20.57,"_id":"671a4ee17f5b518d0d07b2af"}],"total":84.55,"_id":"671a4ee17f5b518d0d07b2ad","createdAt":"2024-10-24T13:42:57.150Z","__v":0}
+[2024-10-24T13:42:57.573Z] GET /api/orders
+[2024-10-24T13:42:57.573Z] Response: 200 [{"_id":"671a4ee17f5b518d0d07b2ad","name":"Asa da","orderNumber":"ORD1729777377147","user":"671a25bfb41958107c1a4299","items":[{"product":{"_id":"671a32bdd291d11dd21327eb","name":"Shower Curtains Set","nameEs":"Juego de Cortinas de Ducha","price":11.42,"category":"Bathroom","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Shower Curtains Set","quantity":2,"price":11.42,"_id":"671a4ee17f5b518d0d07b2ae"},{"product":{"_id":"671a32bdd291d11dd21327e8","name":"Bed Skirt King","nameEs":"Falda de Cama King","price":20.57,"category":"Bed Skirts","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Bed Skirt King","quantity":3,"price":20.57,"_id":"671a4ee17f5b518d0d07b2af"}],"total":84.55,"createdAt":"2024-10-24T13:42:57.150Z","__v":0},{"_id":"671a4ed87f5b518d0d07b297","orderNumber":"ORD1729777368491","user":"671a25bfb41958107c1a4299","items":[{"product":{"_id":"671a32bdd291d11dd21327eb","name":"Shower Curtains Set","nameEs":"Juego de Cortinas de Ducha","price":11.42,"category":"Bathroom","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Shower Curtains Set","quantity":2,"price":11.42,"_id":"671a4ed87f5b518d0d07b298"},{"product":{"_id":"671a32bdd291d11dd21327e8","name":"Bed Skirt King","nameEs":"Falda de Cama King","price":20.57,"category":"Bed Skirts","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Bed Skirt King","quantity":1,"price":20.57,"_id":"671a4ed87f5b518d0d07b299"}],"total":43.41,"createdAt":"2024-10-24T13:42:48.505Z","__v":0}]
+[2024-10-24T13:42:58.163Z] GET /api/orders
+[2024-10-24T13:42:58.163Z] Response: 304 
+[2024-10-24T13:43:01.024Z] GET /api/orders/671a4ee17f5b518d0d07b2ad
+[2024-10-24T13:43:01.024Z] Response: 200 {"_id":"671a4ee17f5b518d0d07b2ad","name":"Asa da","orderNumber":"ORD1729777377147","user":"671a25bfb41958107c1a4299","items":[{"product":{"_id":"671a32bdd291d11dd21327eb","name":"Shower Curtains Set","nameEs":"Juego de Cortinas de Ducha","price":11.42,"category":"Bathroom","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Shower Curtains Set","quantity":2,"price":11.42,"_id":"671a4ee17f5b518d0d07b2ae"},{"product":{"_id":"671a32bdd291d11dd21327e8","name":"Bed Skirt King","nameEs":"Falda de Cama King","price":20.57,"category":"Bed Skirts","createdAt":"2024-10-24T11:42:53.664Z","__v":0},"name":"Bed Skirt King","quantity":3,"price":20.57,"_id":"671a4ee17f5b518d0d07b2af"}],"total":84.55,"createdAt":"2024-10-24T13:42:57.150Z","__v":0}
+[2024-10-24T13:43:01.619Z] GET /api/orders/671a4ee17f5b518d0d07b2ad
+[2024-10-24T13:43:01.619Z] Response: 304 
+[2024-10-24T13:43:05.185Z] GET /api/orders
+[2024-10-24T13:43:05.185Z] Response: 304 
+[2024-10-24T13:43:05.779Z] GET /api/orders
+[2024-10-24T13:43:05.779Z] Response: 304 
+[2024-10-24T13:43:06.892Z] GET /api/products
+[2024-10-24T13:43:06.892Z] Response: 304 
+[2024-10-24T13:43:07.297Z] GET /api/products
+[2024-10-24T13:43:07.297Z] Response: 304 
+[2024-10-24T13:43:08.449Z] GET /api/products
+[2024-10-24T13:43:08.449Z] Response: 304 
+[2024-10-24T13:43:08.850Z] GET /api/products
+[2024-10-24T13:43:08.850Z] Response: 304 
+[2024-10-24T13:43:11.010Z] GET /api/orders
+[2024-10-24T13:43:11.010Z] Response: 304 
+[2024-10-24T13:43:11.610Z] GET /api/orders
+[2024-10-24T13:43:11.610Z] Response: 304 
