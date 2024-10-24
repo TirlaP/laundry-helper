@@ -81,7 +81,7 @@ const Dashboard = () => {
 		<div className="space-y-6">
 			<h1 className="text-2xl font-bold">{t("dashboard.title")}</h1>
 
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 				<Card className="p-6">
 					<div className="flex items-center justify-between">
 						<div>
@@ -112,7 +112,7 @@ const Dashboard = () => {
 					</div>
 				</Card>
 
-				<Card className="p-6">
+				<Card className="p-6 sm:col-span-2 md:col-span-1">
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-sm text-gray-600">
@@ -134,74 +134,78 @@ const Dashboard = () => {
 					{t("dashboard.recentOrders")}
 				</h2>
 				<div className="overflow-x-auto">
-					<table className="w-full">
-						<thead>
-							<tr className="text-left border-b">
-								<th className="pb-3 font-semibold">
-									{t("orders.orderNumber")}
-								</th>
-								<th className="pb-3 font-semibold">{t("common.date")}</th>
-								<th className="pb-3 font-semibold">{t("common.items")}</th>
-								<th className="pb-3 font-semibold text-right">
-									{t("common.total")}
-								</th>
-								<th className="pb-3 font-semibold text-right">
-									{t("common.actions")}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{recentOrders.map((order) => (
-								<tr
-									key={order._id}
-									className="border-b last:border-b-0 hover:bg-gray-50"
-								>
-									<td className="py-3">#{order.orderNumber}</td>
-									<td className="py-3">
-										{format(new Date(order.createdAt), "MMM dd, yyyy")}
-									</td>
-									<td className="py-3">
-										{order.items.length} {t("common.items")}
-									</td>
-									<td className="py-3 text-right">${order.total.toFixed(2)}</td>
-									<td className="py-3 text-right">
-										<div className="flex justify-end space-x-2">
-											<button
-												onClick={() => navigate(`/orders/${order._id}`)}
-												className="text-gray-600 hover:text-gray-900"
-												title={t("common.view")}
-											>
-												<Eye className="w-4 h-4" />
-											</button>
-											<button
-												onClick={() =>
-													handleExport(order._id, order.orderNumber)
-												}
-												className="text-green-600 hover:text-green-700"
-												title={t("orders.export")}
-											>
-												<Download className="w-4 h-4" />
-											</button>
-											<button
-												onClick={() => navigate(`/orders/${order._id}/edit`)}
-												className="text-blue-600 hover:text-blue-700"
-												title={t("common.edit")}
-											>
-												<Edit className="w-4 h-4" />
-											</button>
-											<button
-												onClick={() => handleDelete(order._id)}
-												className="text-red-600 hover:text-red-700"
-												title={t("common.delete")}
-											>
-												<Trash className="w-4 h-4" />
-											</button>
-										</div>
-									</td>
+					<div className="max-h-[60vh] overflow-y-auto">
+						<table className="w-full">
+							<thead className="sticky top-0 bg-white">
+								<tr className="text-left border-b">
+									<th className="pb-3 font-semibold">
+										{t("orders.orderNumber")}
+									</th>
+									<th className="pb-3 font-semibold">{t("common.date")}</th>
+									<th className="pb-3 font-semibold">{t("common.items")}</th>
+									<th className="pb-3 font-semibold text-right">
+										{t("common.total")}
+									</th>
+									<th className="pb-3 font-semibold text-right">
+										{t("common.actions")}
+									</th>
 								</tr>
-							))}
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								{recentOrders.map((order) => (
+									<tr
+										key={order._id}
+										className="border-b last:border-b-0 hover:bg-gray-50"
+									>
+										<td className="py-3">#{order.orderNumber}</td>
+										<td className="py-3">
+											{format(new Date(order.createdAt), "MMM dd, yyyy")}
+										</td>
+										<td className="py-3">
+											{order.items.length} {t("common.items")}
+										</td>
+										<td className="py-3 text-right">
+											${order.total.toFixed(2)}
+										</td>
+										<td className="py-3 text-right">
+											<div className="flex justify-end space-x-2">
+												<button
+													onClick={() => navigate(`/orders/${order._id}`)}
+													className="text-gray-600 hover:text-gray-900"
+													title={t("common.view")}
+												>
+													<Eye className="w-4 h-4" />
+												</button>
+												<button
+													onClick={() =>
+														handleExport(order._id, order.orderNumber)
+													}
+													className="text-green-600 hover:text-green-700"
+													title={t("orders.export")}
+												>
+													<Download className="w-4 h-4" />
+												</button>
+												<button
+													onClick={() => navigate(`/orders/${order._id}/edit`)}
+													className="text-blue-600 hover:text-blue-700"
+													title={t("common.edit")}
+												>
+													<Edit className="w-4 h-4" />
+												</button>
+												<button
+													onClick={() => handleDelete(order._id)}
+													className="text-red-600 hover:text-red-700"
+													title={t("common.delete")}
+												>
+													<Trash className="w-4 h-4" />
+												</button>
+											</div>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</Card>
 		</div>

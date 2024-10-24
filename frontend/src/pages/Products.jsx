@@ -99,9 +99,9 @@ const Products = () => {
 			</div>
 
 			<Card className="p-6">
-				<div className="overflow-x-auto">
+				<div className="max-h-[70vh] overflow-y-auto">
 					<table className="w-full">
-						<thead>
+						<thead className="sticky top-0 bg-white">
 							<tr className="text-left border-b">
 								<th className="pb-3 font-semibold">{t("common.name")}</th>
 								<th className="pb-3 font-semibold">
@@ -126,18 +126,22 @@ const Products = () => {
 										${product.price.toFixed(2)}
 									</td>
 									<td className="py-3 text-right">
-										<button
-											onClick={() => handleOpenModal(product)}
-											className="text-blue-600 hover:text-blue-700 mr-2"
-										>
-											<Edit2 className="w-4 h-4" />
-										</button>
-										<button
-											onClick={() => handleDelete(product._id)}
-											className="text-red-600 hover:text-red-700"
-										>
-											<Trash2 className="w-4 h-4" />
-										</button>
+										<div className="flex justify-end space-x-2">
+											<button
+												onClick={() => handleOpenModal(product)}
+												className="text-blue-600 hover:text-blue-700"
+												title={t("common.edit")}
+											>
+												<Edit2 className="w-4 h-4" />
+											</button>
+											<button
+												onClick={() => handleDelete(product._id)}
+												className="text-red-600 hover:text-red-700"
+												title={t("common.delete")}
+											>
+												<Trash2 className="w-4 h-4" />
+											</button>
+										</div>
 									</td>
 								</tr>
 							))}
@@ -147,7 +151,7 @@ const Products = () => {
 			</Card>
 
 			{isModalOpen && (
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
 					<div className="bg-white rounded-lg p-6 w-full max-w-md">
 						<h2 className="text-xl font-bold mb-4">
 							{editingProduct
@@ -216,6 +220,7 @@ const Products = () => {
 								<Button
 									variant="secondary"
 									onClick={() => setIsModalOpen(false)}
+									type="button"
 								>
 									{t("common.cancel")}
 								</Button>
