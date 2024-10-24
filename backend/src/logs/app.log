@@ -1,0 +1,5 @@
+[2024-10-24T13:02:08.730Z] GET /api/orders/671a36d7f08d1b5e8eb92b9b/export
+[2024-10-24T13:02:08.730Z] Response: 200 "orderNumber","name","productName","quantity","price","totalPrice","category"
+"ORD1729771223605","N/A","Shower Curtains Set",1,11.42,11.42,"Bathroom"
+"ORD1729771223605","N/A","Bed Skirt King",2,20.57,41.14,"Bed Skirts"
+"ORD1729771223605","N/A","Protector King",4,2.24,8.96,"Protectors"
