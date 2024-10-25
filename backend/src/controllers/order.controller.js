@@ -5,11 +5,16 @@ import Product from "../models/product.model.js";
 export const createOrder = async (req, res) => {
 	try {
 		const { items, name } = req.body;
+		const userId = req.user?.id;
+
+		if (!userId) {
+			return res.status(401).json({ message: "Authentication required" });
+		}
 
 		// Verify and transform items
 		const transformedItems = await Promise.all(
 			items.map(async (item) => {
-				const product = await Product.findById(item.product); // Changed from item.productId to item.product
+				const product = await Product.findById(item.product);
 				if (!product) {
 					throw new Error(`Product not found with id: ${item.product}`);
 				}
@@ -23,16 +28,17 @@ export const createOrder = async (req, res) => {
 			})
 		);
 
-		// Calculate total
 		const total = transformedItems.reduce(
 			(sum, item) => sum + item.price * item.quantity,
 			0
 		);
 
+		// Create new order using the user's actual username
 		const order = new Order({
-			name: name || undefined, // Added name field
+			name: name || undefined,
 			orderNumber: `ORD${Date.now()}`,
-			user: req.user.id,
+			user: userId,
+			createdBy: req.user.username || req.user.email || "Anonymous",
 			items: transformedItems,
 			total,
 		});
@@ -50,6 +56,7 @@ export const getOrders = async (req, res) => {
 	try {
 		const orders = await Order.find({ user: req.user.id })
 			.populate("items.product")
+			.populate("user", "displayName") // Add this to get user info
 			.sort({ createdAt: -1 });
 		res.status(200).json(orders);
 	} catch (error) {
@@ -80,7 +87,9 @@ export const getOrderById = async (req, res) => {
 		const order = await Order.findOne({
 			_id: req.params.id,
 			user: req.user.id,
-		}).populate("items.product");
+		})
+			.populate("items.product")
+			.populate("user", "displayName"); // Add this to get user info
 
 		if (!order) {
 			return res.status(404).json({ message: "Order not found" });
@@ -114,7 +123,9 @@ export const exportOrder = async (req, res) => {
 		const order = await Order.findOne({
 			_id: req.params.id,
 			user: req.user.id,
-		}).populate("items.product");
+		})
+			.populate("items.product")
+			.populate("user", "displayName");
 
 		if (!order) {
 			return res.status(404).json({ message: "Order not found" });
@@ -123,15 +134,18 @@ export const exportOrder = async (req, res) => {
 		const fields = [
 			"orderNumber",
 			"name",
+			"createdBy",
 			"productName",
 			"quantity",
 			"price",
 			"totalPrice",
 			"category",
 		];
+
 		const data = order.items.map((item) => ({
 			orderNumber: order.orderNumber,
 			name: order.name || "N/A",
+			createdBy: order.createdBy,
 			productName: item.name,
 			quantity: item.quantity,
 			price: item.price,

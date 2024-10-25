@@ -58,17 +58,9 @@ const OrderDetails = () => {
 		}
 	};
 
-	if (loading) {
-		return <div className="p-4">{t("common.loading")}</div>;
-	}
-
-	if (error) {
-		return <div className="p-4 text-red-500">{error}</div>;
-	}
-
-	if (!order) {
-		return <div className="p-4">{t("orders.notFound")}</div>;
-	}
+	if (loading) return <div className="p-4">{t("common.loading")}</div>;
+	if (error) return <div className="p-4 text-red-500">{error}</div>;
+	if (!order) return <div className="p-4">{t("orders.notFound")}</div>;
 
 	return (
 		<div className="space-y-6">
@@ -84,9 +76,12 @@ const OrderDetails = () => {
 						<h1 className="text-2xl font-bold">
 							{t("orders.orderNumber")} {order.orderNumber}
 						</h1>
-						<p className="text-gray-500">
-							{format(new Date(order.createdAt), "PPpp")}
-						</p>
+						<div className="text-gray-500 space-y-1">
+							<p>{format(new Date(order.createdAt), "PPpp")}</p>
+							<p>
+								{t("common.createdBy")}: {order.createdBy}
+							</p>
+						</div>
 					</div>
 				</div>
 

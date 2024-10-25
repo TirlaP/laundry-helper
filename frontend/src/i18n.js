@@ -28,6 +28,9 @@ const en = {
 		create: "Create",
 		update: "Update",
 		appName: "Laundry Helper",
+		createdBy: "Created By",
+		email: "Email",
+		username: "Username",
 	},
 	categories: {
 		"Mattress Pads": "Mattress Pads",
@@ -55,10 +58,16 @@ const en = {
 	auth: {
 		username: "Username",
 		password: "Password",
+		email: "Email",
 		loginTitle: "Sign in to your account",
 		registerTitle: "Create your account",
 		loginError: "Invalid credentials",
 		registerError: "Registration failed",
+		noAccount: "Don't have an account?",
+		registerNow: "Register now",
+		haveAccount: "Already have an account?",
+		loginHere: "Sign in here",
+		loginPlaceholder: "Email or username",
 	},
 	dashboard: {
 		title: "Dashboard",
@@ -79,6 +88,7 @@ const en = {
 		status: "Status",
 		export: "Export",
 		view: "View",
+		createdBy: "Created By", // Added here
 		availableProducts: "Available Products",
 		searchProducts: "Search products...",
 		noItems: "No items added",
@@ -108,7 +118,7 @@ const es = {
 		loading: "Cargando...",
 		save: "Guardar",
 		cancel: "Cancelar",
-		delete: "Eliminar",
+		delete: "Borrar", // Changed from Eliminar
 		edit: "Editar",
 		total: "Total",
 		actions: "Acciones",
@@ -121,7 +131,7 @@ const es = {
 		item: "Artículo",
 		search: "Buscar",
 		filters: "Filtros",
-		all: "Todos",
+		all: "Todo", // Changed from Todos
 		product: "Producto",
 		each: "cada uno",
 		create: "Crear",
@@ -130,14 +140,14 @@ const es = {
 	},
 	categories: {
 		"Mattress Pads": "Protectores de Colchón",
-		Blankets: "Mantas",
-		"Duvet Covers": "Fundas Nórdicas",
+		Blankets: "Cobijas", // Changed from Mantas
+		"Duvet Covers": "Fundas de Edredón", // Changed from Fundas Nórdicas
 		Comforters: "Edredones",
-		"Pillow Shams": "Fundas de Almohada",
-		"Bed Skirts": "Faldones de Cama",
+		"Pillow Shams": "Fundas Decorativas", // Changed from Fundas de Almohada
+		"Bed Skirts": "Volantes de Cama", // Changed from Faldones de Cama
 		Bathroom: "Baño",
 		Kitchen: "Cocina",
-		Rugs: "Alfombras",
+		Rugs: "Tapetes", // Changed from Alfombras
 		"Table Cloths": "Manteles",
 		Curtains: "Cortinas",
 		Protectors: "Protectores",
@@ -145,7 +155,7 @@ const es = {
 		Services: "Servicios",
 	},
 	navigation: {
-		dashboard: "Panel",
+		dashboard: "Tablero", // Changed from Panel
 		orders: "Pedidos",
 		products: "Productos",
 		createOrder: "Crear Pedido",
@@ -154,16 +164,16 @@ const es = {
 	auth: {
 		username: "Usuario",
 		password: "Contraseña",
-		loginTitle: "Iniciar sesión en su cuenta",
-		registerTitle: "Crear su cuenta",
-		loginError: "Credenciales inválidas",
-		registerError: "Error en el registro",
+		loginTitle: "Inicia sesión en tu cuenta", // More informal, Mexican style
+		registerTitle: "Crea tu cuenta", // More informal, Mexican style
+		loginError: "Datos incorrectos", // Changed from Credenciales inválidas
+		registerError: "Error al registrarse", // Changed from Error en el registro
 	},
 	dashboard: {
-		title: "Panel",
-		totalOrders: "Pedidos Totales",
+		title: "Tablero", // Changed from Panel
+		totalOrders: "Total de Pedidos",
 		totalRevenue: "Ingresos Totales",
-		averageOrderValue: "Valor Promedio de Pedidos",
+		averageOrderValue: "Valor Promedio por Pedido", // Changed wording
 		recentOrders: "Pedidos Recientes",
 	},
 	orders: {
@@ -178,15 +188,16 @@ const es = {
 		status: "Estado",
 		export: "Exportar",
 		view: "Ver",
+		createdBy: "Creado Por", // Added here
 		availableProducts: "Productos Disponibles",
 		searchProducts: "Buscar productos...",
-		noItems: "No hay artículos",
-		errorLoadingProducts: "Error al cargar productos",
+		noItems: "Sin artículos",
+		errorLoadingProducts: "Error al cargar los productos",
 		errorCreatingOrder: "Error al crear el pedido",
 		errorLoadingOrder: "Error al cargar el pedido",
-		errorDeletingOrder: "Error al eliminar el pedido",
+		errorDeletingOrder: "Error al borrar el pedido",
 		errorExporting: "Error al exportar el pedido",
-		confirmDelete: "¿Está seguro de que desea eliminar este pedido?",
+		confirmDelete: "¿Seguro que quieres borrar este pedido?",
 		notFound: "Pedido no encontrado",
 		orderItems: "Artículos del Pedido",
 	},
@@ -195,7 +206,7 @@ const es = {
 		addProduct: "Agregar Producto",
 		editProduct: "Editar Producto",
 		spanishName: "Nombre en Español",
-		confirmDelete: "¿Está seguro de que desea eliminar este producto?",
+		confirmDelete: "¿Seguro que quieres borrar este producto?", // More informal, Mexican style
 	},
 };
 

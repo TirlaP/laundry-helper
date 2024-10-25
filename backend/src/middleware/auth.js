@@ -1,4 +1,3 @@
-// middleware/auth.js
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 
@@ -10,19 +9,23 @@ export const auth = async (req, res, next) => {
 			return res.status(401).json({ message: "Authentication required" });
 		}
 
-		// Verify token
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-		// Get user from database
 		const user = await User.findById(decoded.id);
+
 		if (!user) {
 			return res.status(401).json({ message: "User not found" });
 		}
 
-		// Add user to request object
-		req.user = user;
+		req.user = {
+			id: user._id,
+			email: user.email,
+			username: user.username,
+			displayName: user.username || user.email, // Fallback to email if username is not set
+		};
+
 		next();
 	} catch (error) {
-		res.status(401).json({ message: "Invalid token" });
+		console.error("Auth middleware error:", error);
+		res.status(401).json({ message: "Invalid or expired token" });
 	}
 };

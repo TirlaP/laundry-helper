@@ -36,14 +36,14 @@ export const AuthProvider = ({ children }) => {
 		initializeAuth();
 	}, []);
 
-	const login = useCallback(async (username, password) => {
+	const login = useCallback(async (login, password) => {
 		try {
 			const { data } = await apiClient.post("/auth/login", {
-				username,
+				login,
 				password,
 			});
 			localStorage.setItem("token", data.token);
-			setUser({ username });
+			setUser(data.user);
 			return true;
 		} catch (error) {
 			console.error("Login error:", error);
@@ -56,14 +56,15 @@ export const AuthProvider = ({ children }) => {
 		setUser(null);
 	}, []);
 
-	const register = useCallback(async (username, password) => {
+	const register = useCallback(async (email, username, password) => {
 		try {
 			const { data } = await apiClient.post("/auth/register", {
+				email,
 				username,
 				password,
 			});
 			localStorage.setItem("token", data.token);
-			setUser({ username });
+			setUser(data.user);
 			return true;
 		} catch (error) {
 			console.error("Registration error:", error);

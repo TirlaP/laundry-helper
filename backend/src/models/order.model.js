@@ -33,6 +33,10 @@ const orderSchema = new mongoose.Schema({
 		ref: "User",
 		required: true,
 	},
+	createdBy: {
+		type: String,
+		required: true,
+	},
 	items: [orderItemSchema],
 	total: {
 		type: Number,

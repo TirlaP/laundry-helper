@@ -1,12 +1,11 @@
-// Login.jsx
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 const Login = () => {
 	const { t } = useTranslation();
-	const [formData, setFormData] = useState({ username: "", password: "" });
+	const [formData, setFormData] = useState({ login: "", password: "" });
 	const [error, setError] = useState("");
 	const navigate = useNavigate();
 	const { login } = useAuth();
@@ -14,7 +13,7 @@ const Login = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
-			await login(formData.username, formData.password);
+			await login(formData.login, formData.password);
 			navigate("/");
 		} catch (err) {
 			setError(t("auth.loginError"));
@@ -24,10 +23,19 @@ const Login = () => {
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
 			<div className="max-w-md w-full space-y-8">
-				<div>
-					<h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+				<div className="text-center">
+					<h2 className="mt-6 text-3xl font-extrabold text-gray-900">
 						{t("auth.loginTitle")}
 					</h2>
+					<p className="mt-2 text-sm text-gray-600">
+						{t("auth.noAccount")}{" "}
+						<Link
+							to="/register"
+							className="font-medium text-indigo-600 hover:text-indigo-500"
+						>
+							{t("auth.registerNow")}
+						</Link>
+					</p>
 				</div>
 				<form className="mt-8 space-y-6" onSubmit={handleSubmit}>
 					{error && (
@@ -38,14 +46,14 @@ const Login = () => {
 					<div className="rounded-md shadow-sm -space-y-px">
 						<div>
 							<input
-								name="username"
+								name="login"
 								type="text"
 								required
 								className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-								placeholder={t("auth.username")}
-								value={formData.username}
+								placeholder={t("auth.loginPlaceholder")}
+								value={formData.login}
 								onChange={(e) =>
-									setFormData({ ...formData, username: e.target.value })
+									setFormData({ ...formData, login: e.target.value })
 								}
 							/>
 						</div>
@@ -77,4 +85,5 @@ const Login = () => {
 		</div>
 	);
 };
+
 export default Login;

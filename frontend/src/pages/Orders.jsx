@@ -86,6 +86,7 @@ const Orders = () => {
 									{t("orders.orderNumber")}
 								</th>
 								<th className="pb-3 font-semibold">{t("common.date")}</th>
+								<th className="pb-3 font-semibold">{t("orders.createdBy")}</th>
 								<th className="pb-3 font-semibold">{t("common.items")}</th>
 								<th className="pb-3 font-semibold text-right">
 									{t("common.total")}
@@ -105,6 +106,7 @@ const Orders = () => {
 									<td className="py-3">
 										{format(new Date(order.createdAt), "MMM dd, yyyy")}
 									</td>
+									<td className="py-3">{order.createdBy}</td>
 									<td className="py-3">
 										{order.items.length}{" "}
 										{order.items.length === 1

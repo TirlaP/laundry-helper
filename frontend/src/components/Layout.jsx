@@ -186,8 +186,8 @@ const Layout = () => {
 				)}
 
 				{/* Main Content */}
-				<div className="flex-1">
-					<main className="p-6">
+				<div className="h-screen flex-1">
+					<main className="h-full py-4 md:p-6">
 						<Outlet />
 					</main>
 				</div>
