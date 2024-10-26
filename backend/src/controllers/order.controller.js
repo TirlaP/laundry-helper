@@ -1,4 +1,4 @@
-import { Parser } from "json2csv";
+import ExcelJS from "exceljs";
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
 
@@ -131,35 +131,107 @@ export const exportOrder = async (req, res) => {
 			return res.status(404).json({ message: "Order not found" });
 		}
 
-		const fields = [
-			"orderNumber",
-			"name",
-			"createdBy",
-			"productName",
-			"quantity",
-			"price",
-			"totalPrice",
-			"category",
+		// Group items by category
+		const groupedItems = order.items.reduce((acc, item) => {
+			const category = item.product.category;
+			if (!acc[category]) {
+				acc[category] = [];
+			}
+			acc[category].push(item);
+			return acc;
+		}, {});
+
+		// Create workbook and worksheet
+		const workbook = new ExcelJS.Workbook();
+		const worksheet = workbook.addWorksheet("Order Details");
+
+		// Set columns
+		worksheet.columns = [
+			{ header: "Order Number", width: 20 },
+			{ header: "Order Name", width: 15 },
+			{ header: "Created By", width: 25 },
+			{ header: "Category", width: 15 },
+			{ header: "Product Name", width: 30 },
+			{ header: "Quantity", width: 10 },
+			{ header: "Price", width: 12 },
+			{ header: "Total Price", width: 12 },
 		];
 
-		const data = order.items.map((item) => ({
-			orderNumber: order.orderNumber,
-			name: order.name || "N/A",
-			createdBy: order.createdBy,
-			productName: item.name,
-			quantity: item.quantity,
-			price: item.price,
-			totalPrice: item.price * item.quantity,
-			category: item.product.category,
-		}));
+		// Style headers
+		worksheet.getRow(1).font = { bold: true };
+		worksheet.getRow(1).alignment = {
+			vertical: "middle",
+			horizontal: "center",
+		};
 
-		const json2csvParser = new Parser({ fields });
-		const csv = json2csvParser.parse(data);
+		// Add data
+		let rowIndex = 2;
+		const firstDataRow = rowIndex;
 
-		res.header("Content-Type", "text/csv");
-		res.attachment(`order-${order.orderNumber}.csv`);
-		res.send(csv);
+		Object.entries(groupedItems).forEach(([category, items]) => {
+			const categoryStartRow = rowIndex;
+
+			items.forEach((item) => {
+				const row = worksheet.addRow([
+					rowIndex === firstDataRow ? order.orderNumber : "",
+					rowIndex === firstDataRow ? order.name || "N/A" : "",
+					rowIndex === firstDataRow ? order.createdBy : "",
+					category,
+					item.name,
+					item.quantity,
+					`$${(item.price * item.quantity).toFixed(2)}`,
+					rowIndex === firstDataRow ? `$${order.total.toFixed(2)}` : "",
+				]);
+
+				// Center align all cells in the row
+				row.eachCell((cell) => {
+					cell.alignment = { vertical: "middle", horizontal: "center" };
+				});
+
+				rowIndex++;
+			});
+
+			// Merge category cells if multiple items
+			if (items.length > 1) {
+				worksheet.mergeCells(categoryStartRow, 4, rowIndex - 1, 4);
+			}
+		});
+
+		const lastDataRow = rowIndex - 1;
+
+		// Merge repeating info cells
+		worksheet.mergeCells(firstDataRow, 1, lastDataRow, 1); // Order Number
+		worksheet.mergeCells(firstDataRow, 2, lastDataRow, 2); // Order Name
+		worksheet.mergeCells(firstDataRow, 3, lastDataRow, 3); // Created By
+		worksheet.mergeCells(firstDataRow, 8, lastDataRow, 8); // Total Price
+
+		// Add borders to all cells
+		worksheet.eachRow((row) => {
+			row.eachCell((cell) => {
+				cell.border = {
+					top: { style: "thin" },
+					left: { style: "thin" },
+					bottom: { style: "thin" },
+					right: { style: "thin" },
+				};
+			});
+		});
+
+		// Generate buffer
+		const buffer = await workbook.xlsx.writeBuffer();
+
+		// Send response
+		res.setHeader(
+			"Content-Disposition",
+			`attachment; filename=order-${order.orderNumber}.xlsx`
+		);
+		res.setHeader(
+			"Content-Type",
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+		);
+		res.send(buffer);
 	} catch (error) {
+		console.error("Export error:", error);
 		res.status(500).json({ message: error.message });
 	}
 };

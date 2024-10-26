@@ -10,7 +10,7 @@ import {
 	Plus,
 	X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -21,7 +21,26 @@ const Layout = () => {
 	const location = useLocation();
 	const { t, i18n } = useTranslation();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-	const [isCollapsed, setIsCollapsed] = useState(false);
+	const [isCollapsed, setIsCollapsed] = useState(
+		window.innerWidth >= 768 && window.innerWidth < 992
+	);
+
+	useEffect(() => {
+		const handleResize = () => {
+			const width = window.innerWidth;
+			if (width >= 768 && width < 992) {
+				setIsCollapsed(true);
+			} else if (width >= 992) {
+				setIsCollapsed(false);
+			}
+		};
+
+		// Initial check
+		handleResize();
+
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
 
 	const toggleLanguage = () => {
 		const newLang = i18n.language === "en" ? "es" : "en";
@@ -42,19 +61,23 @@ const Layout = () => {
 	};
 
 	const Sidebar = ({ isMobile = false }) => (
-		<div className="flex flex-col h-full bg-white relative">
+		<div className="flex flex-col h-full bg-white">
 			{/* App Title */}
-			<div className="px-4 py-4 border-b">
+			<div
+				className={`p-4 border-b flex items-center ${
+					isCollapsed && !isMobile ? "justify-center h-16" : ""
+				}`}
+			>
 				<h1
-					className={`text-xl font-bold text-gray-800 transition-opacity duration-300 ${
-						isCollapsed && !isMobile ? "opacity-0" : "opacity-100"
+					className={`text-xl font-bold text-gray-800 transition-all duration-300 ${
+						isCollapsed && !isMobile ? "w-0 opacity-0" : "opacity-100"
 					}`}
 				>
 					{t("common.appName")}
 				</h1>
 			</div>
 
-			{/* Collapse Button (Desktop only) */}
+			{/* Collapse Button */}
 			{!isMobile && (
 				<button
 					onClick={() => setIsCollapsed(!isCollapsed)}
@@ -81,6 +104,8 @@ const Layout = () => {
 								key={item.name}
 								to={item.href}
 								className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+									isCollapsed && !isMobile ? "justify-center" : ""
+								} ${
 									isActive
 										? "bg-blue-50 text-blue-700"
 										: "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -90,7 +115,7 @@ const Layout = () => {
 								<item.icon
 									className={`w-5 h-5 ${
 										isActive ? "text-blue-500" : "text-gray-400"
-									} ${!isCollapsed && "mr-3"}`}
+									} ${!isCollapsed && !isMobile ? "mr-3" : ""}`}
 								/>
 								<span
 									className={`${isCollapsed && !isMobile ? "hidden" : "block"}`}
@@ -104,10 +129,14 @@ const Layout = () => {
 					{/* Language Toggle */}
 					<button
 						onClick={toggleLanguage}
-						className="flex items-center w-full px-2 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900"
+						className={`flex items-center w-full px-2 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900 ${
+							isCollapsed && !isMobile ? "justify-center" : ""
+						}`}
 					>
 						<Globe
-							className={`w-5 h-5 text-gray-400 ${!isCollapsed && "mr-3"}`}
+							className={`w-5 h-5 text-gray-400 ${
+								!isCollapsed && !isMobile ? "mr-3" : ""
+							}`}
 						/>
 						<span
 							className={`${isCollapsed && !isMobile ? "hidden" : "block"}`}
@@ -119,13 +148,17 @@ const Layout = () => {
 			</div>
 
 			{/* Logout Button */}
-			<div className="p-4 border-t mt-auto">
+			<div className="p-4 border-t">
 				<button
 					onClick={handleLogout}
-					className="flex items-center w-full px-2 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900"
+					className={`flex items-center w-full px-2 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900 ${
+						isCollapsed && !isMobile ? "justify-center" : ""
+					}`}
 				>
 					<LogOut
-						className={`w-5 h-5 text-gray-400 ${!isCollapsed && "mr-3"}`}
+						className={`w-5 h-5 text-gray-400 ${
+							!isCollapsed && !isMobile ? "mr-3" : ""
+						}`}
 					/>
 					<span className={`${isCollapsed && !isMobile ? "hidden" : "block"}`}>
 						{t("common.logout")}
@@ -146,6 +179,7 @@ const Layout = () => {
 					>
 						<Menu className="h-6 w-6" />
 					</button>
+					<div className="ml-4 font-semibold">{t("common.appName")}</div>
 				</div>
 			</div>
 
@@ -157,7 +191,7 @@ const Layout = () => {
 					}`}
 				>
 					<div
-						className="fixed top-0 bottom-0 z-30"
+						className="fixed top-0 bottom-0 z-30 border-r bg-white"
 						style={{ width: isCollapsed ? "4rem" : "16rem" }}
 					>
 						<Sidebar />
@@ -186,8 +220,8 @@ const Layout = () => {
 				)}
 
 				{/* Main Content */}
-				<div className="h-screen flex-1">
-					<main className="h-full py-4 md:p-6">
+				<div className="flex-1 relative">
+					<main className="h-full p-4 md:p-6 overflow-auto">
 						<Outlet />
 					</main>
 				</div>

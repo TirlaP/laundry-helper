@@ -6,6 +6,74 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "../components/ui/Card";
 import apiClient from "../utils/apiClient";
 
+// Utility function to format numbers with k/m suffix
+const formatNumber = (num) => {
+	if (num >= 1000000) {
+		return `${(num / 1000000).toFixed(1)}m`;
+	}
+	if (num >= 1000) {
+		return `${(num / 1000).toFixed(1)}k`;
+	}
+	return num.toFixed(2);
+};
+
+// Mobile Order Card Component
+const OrderCard = ({ order, onExport, onDelete, navigate, t }) => (
+	<Card className="mb-4 p-4">
+		<div className="space-y-2">
+			<div className="flex justify-between items-start">
+				<div>
+					<div className="space-y-1">
+						<p className="text-sm text-gray-600">#{order.orderNumber}</p>
+						<h3 className="font-semibold">{order.name || "-"}</h3>
+					</div>
+					<p className="text-sm text-gray-500 mt-1">
+						{format(new Date(order.createdAt), "MMM dd, yyyy")}
+					</p>
+				</div>
+				<div className="text-right">
+					<div className="font-bold">${order.total.toFixed(2)}</div>
+					<div className="text-sm text-gray-500">
+						{order.items.length}{" "}
+						{order.items.length === 1 ? t("common.item") : t("common.items")}
+					</div>
+				</div>
+			</div>
+
+			<div className="flex justify-end space-x-2 pt-2">
+				<button
+					onClick={() => navigate(`/orders/${order._id}`)}
+					className="p-2 text-gray-600 hover:text-gray-900"
+					title={t("common.view")}
+				>
+					<Eye className="w-4 h-4" />
+				</button>
+				<button
+					onClick={() => onExport(order._id, order.orderNumber)}
+					className="p-2 text-green-600 hover:text-green-700"
+					title={t("orders.export")}
+				>
+					<Download className="w-4 h-4" />
+				</button>
+				<button
+					onClick={() => navigate(`/orders/${order._id}/edit`)}
+					className="p-2 text-blue-600 hover:text-blue-700"
+					title={t("common.edit")}
+				>
+					<Edit className="w-4 h-4" />
+				</button>
+				<button
+					onClick={() => onDelete(order._id)}
+					className="p-2 text-red-600 hover:text-red-700"
+					title={t("common.delete")}
+				>
+					<Trash className="w-4 h-4" />
+				</button>
+			</div>
+		</div>
+	</Card>
+);
+
 const Dashboard = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
@@ -49,7 +117,7 @@ const Dashboard = () => {
 			const url = window.URL.createObjectURL(new Blob([response.data]));
 			const link = document.createElement("a");
 			link.href = url;
-			link.setAttribute("download", `order-${orderNumber}.csv`);
+			link.setAttribute("download", `order-${orderNumber}.xlsx`);
 			document.body.appendChild(link);
 			link.click();
 			link.remove();
@@ -103,7 +171,7 @@ const Dashboard = () => {
 								{t("dashboard.totalRevenue")}
 							</p>
 							<h3 className="text-2xl font-bold mt-1">
-								${stats.totalRevenue.toFixed(2)}
+								${formatNumber(stats.totalRevenue)}
 							</h3>
 						</div>
 						<div className="p-3 bg-blue-50 rounded-full">
@@ -119,7 +187,7 @@ const Dashboard = () => {
 								{t("dashboard.averageOrderValue")}
 							</p>
 							<h3 className="text-2xl font-bold mt-1">
-								${stats.averageOrderValue.toFixed(2)}
+								${formatNumber(stats.averageOrderValue)}
 							</h3>
 						</div>
 						<div className="p-3 bg-blue-50 rounded-full">
@@ -129,18 +197,20 @@ const Dashboard = () => {
 				</Card>
 			</div>
 
-			<Card className="p-6">
-				<h2 className="text-lg font-semibold mb-4">
-					{t("dashboard.recentOrders")}
-				</h2>
-				<div className="overflow-x-auto">
-					<div className="max-h-[60vh] overflow-y-auto">
+			{/* Desktop view */}
+			<div className="hidden md:block">
+				<Card className="p-6">
+					<h2 className="text-lg font-semibold mb-4">
+						{t("dashboard.recentOrders")}
+					</h2>
+					<div className="overflow-x-auto">
 						<table className="w-full">
-							<thead className="sticky top-0 bg-white">
+							<thead>
 								<tr className="text-left border-b">
 									<th className="pb-3 font-semibold">
 										{t("orders.orderNumber")}
 									</th>
+									<th className="pb-3 font-semibold">{t("common.name")}</th>
 									<th className="pb-3 font-semibold">{t("common.date")}</th>
 									<th className="pb-3 font-semibold">{t("common.items")}</th>
 									<th className="pb-3 font-semibold text-right">
@@ -158,11 +228,15 @@ const Dashboard = () => {
 										className="border-b last:border-b-0 hover:bg-gray-50"
 									>
 										<td className="py-3">#{order.orderNumber}</td>
+										<td className="py-3">{order.name || "-"}</td>
 										<td className="py-3">
 											{format(new Date(order.createdAt), "MMM dd, yyyy")}
 										</td>
 										<td className="py-3">
-											{order.items.length} {t("common.items")}
+											{order.items.length}{" "}
+											{order.items.length === 1
+												? t("common.item")
+												: t("common.items")}
 										</td>
 										<td className="py-3 text-right">
 											${order.total.toFixed(2)}
@@ -171,7 +245,7 @@ const Dashboard = () => {
 											<div className="flex justify-end space-x-2">
 												<button
 													onClick={() => navigate(`/orders/${order._id}`)}
-													className="text-gray-600 hover:text-gray-900"
+													className="p-2 text-gray-600 hover:text-gray-900"
 													title={t("common.view")}
 												>
 													<Eye className="w-4 h-4" />
@@ -180,21 +254,21 @@ const Dashboard = () => {
 													onClick={() =>
 														handleExport(order._id, order.orderNumber)
 													}
-													className="text-green-600 hover:text-green-700"
+													className="p-2 text-green-600 hover:text-green-700"
 													title={t("orders.export")}
 												>
 													<Download className="w-4 h-4" />
 												</button>
 												<button
 													onClick={() => navigate(`/orders/${order._id}/edit`)}
-													className="text-blue-600 hover:text-blue-700"
+													className="p-2 text-blue-600 hover:text-blue-700"
 													title={t("common.edit")}
 												>
 													<Edit className="w-4 h-4" />
 												</button>
 												<button
 													onClick={() => handleDelete(order._id)}
-													className="text-red-600 hover:text-red-700"
+													className="p-2 text-red-600 hover:text-red-700"
 													title={t("common.delete")}
 												>
 													<Trash className="w-4 h-4" />
@@ -206,8 +280,25 @@ const Dashboard = () => {
 							</tbody>
 						</table>
 					</div>
-				</div>
-			</Card>
+				</Card>
+			</div>
+
+			{/* Mobile view */}
+			<div className="md:hidden">
+				<h2 className="text-lg font-semibold mb-4">
+					{t("dashboard.recentOrders")}
+				</h2>
+				{recentOrders.map((order) => (
+					<OrderCard
+						key={order._id}
+						order={order}
+						onExport={handleExport}
+						onDelete={handleDelete}
+						navigate={navigate}
+						t={t}
+					/>
+				))}
+			</div>
 		</div>
 	);
 };

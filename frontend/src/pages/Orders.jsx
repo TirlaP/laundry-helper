@@ -23,20 +23,22 @@ const Orders = () => {
 				setLoading(false);
 			}
 		};
-
 		fetchOrders();
 	}, []);
 
-	const handleExport = async (orderId, orderNumber) => {
+	const handleExport = async (order) => {
 		try {
-			const response = await apiClient.get(`/orders/${orderId}/export`, {
+			const response = await apiClient.get(`/orders/${order._id}/export`, {
 				responseType: "blob",
 			});
 
 			const url = window.URL.createObjectURL(new Blob([response.data]));
 			const link = document.createElement("a");
 			link.href = url;
-			link.setAttribute("download", `order-${orderNumber}.csv`);
+			const fileName = order.name
+				? `Order-${order.name}-${format(new Date(order.createdAt), "MMddyyyy")}`
+				: `Order-${order.orderNumber}`;
+			link.setAttribute("download", `${fileName}.xlsx`);
 			document.body.appendChild(link);
 			link.click();
 			link.remove();
@@ -55,6 +57,67 @@ const Orders = () => {
 			}
 		}
 	};
+
+	// Mobile Order Card Component
+	const OrderCard = ({ order }) => (
+		<Card className="mb-4 p-4">
+			<div className="space-y-2">
+				<div className="flex justify-between items-start">
+					<div>
+						<div className="space-y-1">
+							<p className="text-sm text-gray-600">#{order.orderNumber}</p>
+							<h3 className="font-semibold">{order.name || "-"}</h3>
+						</div>
+						<p className="text-sm text-gray-500 mt-1">
+							{format(new Date(order.createdAt), "MMM dd, yyyy")}
+						</p>
+					</div>
+					<div className="text-right">
+						<div className="font-bold">${order.total.toFixed(2)}</div>
+						<div className="text-sm text-gray-500">
+							{order.items.length}{" "}
+							{order.items.length === 1 ? t("common.item") : t("common.items")}
+						</div>
+					</div>
+				</div>
+
+				<div>
+					<p className="text-sm text-gray-600">{order.createdBy}</p>
+				</div>
+
+				<div className="flex justify-end space-x-2 pt-2">
+					<button
+						onClick={() => navigate(`/orders/${order._id}`)}
+						className="p-2 text-gray-600 hover:text-gray-900"
+						title={t("common.view")}
+					>
+						<Eye className="w-4 h-4" />
+					</button>
+					<button
+						onClick={() => handleExport(order)}
+						className="p-2 text-green-600 hover:text-green-700"
+						title={t("orders.export")}
+					>
+						<Download className="w-4 h-4" />
+					</button>
+					<button
+						onClick={() => navigate(`/orders/${order._id}/edit`)}
+						className="p-2 text-blue-600 hover:text-blue-700"
+						title={t("common.edit")}
+					>
+						<Edit className="w-4 h-4" />
+					</button>
+					<button
+						onClick={() => handleDelete(order._id)}
+						className="p-2 text-red-600 hover:text-red-700"
+						title={t("common.delete")}
+					>
+						<Trash className="w-4 h-4" />
+					</button>
+				</div>
+			</div>
+		</Card>
+	);
 
 	if (loading) {
 		return (
@@ -77,83 +140,97 @@ const Orders = () => {
 				</button>
 			</div>
 
-			<Card className="p-6">
-				<div className="overflow-x-auto">
-					<table className="w-full">
-						<thead>
-							<tr className="text-left border-b">
-								<th className="pb-3 font-semibold">
-									{t("orders.orderNumber")}
-								</th>
-								<th className="pb-3 font-semibold">{t("common.date")}</th>
-								<th className="pb-3 font-semibold">{t("orders.createdBy")}</th>
-								<th className="pb-3 font-semibold">{t("common.items")}</th>
-								<th className="pb-3 font-semibold text-right">
-									{t("common.total")}
-								</th>
-								<th className="pb-3 font-semibold text-right">
-									{t("common.actions")}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{orders.map((order) => (
-								<tr
-									key={order._id}
-									className="border-b last:border-b-0 hover:bg-gray-50"
-								>
-									<td className="py-3">#{order.orderNumber}</td>
-									<td className="py-3">
-										{format(new Date(order.createdAt), "MMM dd, yyyy")}
-									</td>
-									<td className="py-3">{order.createdBy}</td>
-									<td className="py-3">
-										{order.items.length}{" "}
-										{order.items.length === 1
-											? t("common.item")
-											: t("common.items")}
-									</td>
-									<td className="py-3 text-right">${order.total.toFixed(2)}</td>
-									<td className="py-3 text-right">
-										<div className="flex justify-end space-x-2">
-											<button
-												onClick={() => navigate(`/orders/${order._id}`)}
-												className="text-gray-600 hover:text-gray-900"
-												title={t("common.view")}
-											>
-												<Eye className="w-4 h-4" />
-											</button>
-											<button
-												onClick={() =>
-													handleExport(order._id, order.orderNumber)
-												}
-												className="text-green-600 hover:text-green-700"
-												title={t("orders.export")}
-											>
-												<Download className="w-4 h-4" />
-											</button>
-											<button
-												onClick={() => navigate(`/orders/${order._id}/edit`)}
-												className="text-blue-600 hover:text-blue-700"
-												title={t("common.edit")}
-											>
-												<Edit className="w-4 h-4" />
-											</button>
-											<button
-												onClick={() => handleDelete(order._id)}
-												className="text-red-600 hover:text-red-700"
-												title={t("common.delete")}
-											>
-												<Trash className="w-4 h-4" />
-											</button>
-										</div>
-									</td>
+			{/* Desktop view */}
+			<div className="hidden md:block">
+				<Card className="p-6">
+					<div className="overflow-x-auto">
+						<table className="w-full">
+							<thead>
+								<tr className="text-left border-b">
+									<th className="pb-3 font-semibold">
+										{t("orders.orderNumber")}
+									</th>
+									<th className="pb-3 font-semibold">{t("common.name")}</th>
+									<th className="pb-3 font-semibold">{t("common.date")}</th>
+									<th className="pb-3 font-semibold">
+										{t("orders.createdBy")}
+									</th>
+									<th className="pb-3 font-semibold">{t("common.items")}</th>
+									<th className="pb-3 font-semibold text-right">
+										{t("common.total")}
+									</th>
+									<th className="pb-3 font-semibold text-right">
+										{t("common.actions")}
+									</th>
 								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-			</Card>
+							</thead>
+							<tbody>
+								{orders.map((order) => (
+									<tr
+										key={order._id}
+										className="border-b last:border-b-0 hover:bg-gray-50"
+									>
+										<td className="py-3">#{order.orderNumber}</td>
+										<td className="py-3">{order.name || "-"}</td>
+										<td className="py-3">
+											{format(new Date(order.createdAt), "MMM dd, yyyy")}
+										</td>
+										<td className="py-3">{order.createdBy}</td>
+										<td className="py-3">
+											{order.items.length}{" "}
+											{order.items.length === 1
+												? t("common.item")
+												: t("common.items")}
+										</td>
+										<td className="py-3 text-right">
+											${order.total.toFixed(2)}
+										</td>
+										<td className="py-3 text-right">
+											<div className="flex justify-end space-x-2">
+												<button
+													onClick={() => navigate(`/orders/${order._id}`)}
+													className="text-gray-600 hover:text-gray-900"
+													title={t("common.view")}
+												>
+													<Eye className="w-4 h-4" />
+												</button>
+												<button
+													onClick={() => handleExport(order)}
+													className="text-green-600 hover:text-green-700"
+													title={t("orders.export")}
+												>
+													<Download className="w-4 h-4" />
+												</button>
+												<button
+													onClick={() => navigate(`/orders/${order._id}/edit`)}
+													className="text-blue-600 hover:text-blue-700"
+													title={t("common.edit")}
+												>
+													<Edit className="w-4 h-4" />
+												</button>
+												<button
+													onClick={() => handleDelete(order._id)}
+													className="text-red-600 hover:text-red-700"
+													title={t("common.delete")}
+												>
+													<Trash className="w-4 h-4" />
+												</button>
+											</div>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				</Card>
+			</div>
+
+			{/* Mobile view */}
+			<div className="md:hidden">
+				{orders.map((order) => (
+					<OrderCard key={order._id} order={order} />
+				))}
+			</div>
 		</div>
 	);
 };

@@ -26,24 +26,22 @@ const OrderSummary = ({
 			</div>
 		) : (
 			<>
-				<div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
+				<div className="space-y-6 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
 					{currentOrder.items.map((item) => (
 						<div
 							key={item.product}
-							className="flex items-center justify-between py-2 border-b last:border-b-0"
+							className="space-y-2 pb-4 border-b last:border-b-0"
 						>
-							<div className="flex-1 min-w-0 pr-4">
-								<div className="font-medium truncate">
-									{i18n.language === "es"
-										? products.find((p) => p._id === item.product)?.nameEs
-										: products.find((p) => p._id === item.product)?.name}
-								</div>
-								<div className="text-sm text-gray-500">
-									${item.price.toFixed(2)} {t("common.each")}
-								</div>
+							<div className="font-medium text-lg">
+								{i18n.language === "es"
+									? products.find((p) => p._id === item.product)?.nameEs
+									: products.find((p) => p._id === item.product)?.name}
 							</div>
-							<div className="flex items-center gap-3">
-								<div className="flex items-center space-x-2">
+							<div className="text-gray-500">
+								${item.price.toFixed(2)} {t("common.each")}
+							</div>
+							<div className="flex items-center justify-between">
+								<div className="flex items-center space-x-2 bg-gray-50 rounded-full border p-1">
 									<button
 										onClick={() => {
 											const product = products.find(
@@ -51,7 +49,7 @@ const OrderSummary = ({
 											);
 											updateItemQuantity(product, item.quantity - 1);
 										}}
-										className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+										className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
 									>
 										<Minus className="w-4 h-4 text-gray-600" />
 									</button>
@@ -65,12 +63,12 @@ const OrderSummary = ({
 											);
 											updateItemQuantity(product, item.quantity + 1);
 										}}
-										className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+										className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
 									>
 										<Plus className="w-4 h-4 text-gray-600" />
 									</button>
 								</div>
-								<div className="w-20 text-right font-medium">
+								<div className="font-medium">
 									${(item.price * item.quantity).toFixed(2)}
 								</div>
 							</div>
@@ -130,9 +128,7 @@ const MobileOrderSummary = ({
 	return (
 		<div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg z-50">
 			<div className="max-w-[1200px] mx-auto mobile-summary-content">
-				{/* Always visible summary bar */}
 				<div className="border-t">
-					{/* Order details preview - clickable only if there are items */}
 					<div
 						className={`px-6 py-4 flex items-center justify-between ${
 							currentOrder.items.length > 0 ? "cursor-pointer" : ""
@@ -163,7 +159,6 @@ const MobileOrderSummary = ({
 						<span className="font-bold">${currentOrder.total.toFixed(2)}</span>
 					</div>
 
-					{/* Expandable items list - only if there are items */}
 					{currentOrder.items.length > 0 && (
 						<div
 							className={`overflow-hidden transition-all duration-300
@@ -194,7 +189,7 @@ const MobileOrderSummary = ({
 													</div>
 												</div>
 												<div className="flex items-center gap-4">
-													<div className="flex items-center space-x-2">
+													<div className="flex items-center bg-gray-50 rounded-full border p-1">
 														<button
 															onClick={(e) => {
 																e.stopPropagation();
@@ -203,7 +198,7 @@ const MobileOrderSummary = ({
 																);
 																updateItemQuantity(product, item.quantity - 1);
 															}}
-															className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+															className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
 														>
 															<Minus className="w-4 h-4 text-gray-600" />
 														</button>
@@ -218,7 +213,7 @@ const MobileOrderSummary = ({
 																);
 																updateItemQuantity(product, item.quantity + 1);
 															}}
-															className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+															className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
 														>
 															<Plus className="w-4 h-4 text-gray-600" />
 														</button>
@@ -235,7 +230,6 @@ const MobileOrderSummary = ({
 						</div>
 					)}
 
-					{/* Always visible action buttons */}
 					<div className="px-6 py-4 border-t">
 						<div className="flex gap-3 max-w-md mx-auto">
 							<button
@@ -320,11 +314,24 @@ const CreateOrder = () => {
 
 	const updateItemQuantity = (product, quantity) => {
 		setCurrentOrder((prev) => {
-			const updatedItems = prev.items.filter(
-				(item) => item.product !== product._id
-			);
+			const updatedItems = prev.items
+				.map((item) => {
+					if (item.product === product._id) {
+						return quantity > 0
+							? {
+									...item,
+									quantity: quantity,
+							  }
+							: null;
+					}
+					return item;
+				})
+				.filter(Boolean);
 
-			if (quantity > 0) {
+			if (
+				!prev.items.find((item) => item.product === product._id) &&
+				quantity > 0
+			) {
 				updatedItems.push({
 					product: product._id,
 					name: i18n.language === "es" ? product.nameEs : product.name,
@@ -478,7 +485,7 @@ const CreateOrder = () => {
 															<div className="w-20 text-right font-medium text-sm md:text-base">
 																${product.price.toFixed(2)}
 															</div>
-															<div className="flex items-center gap-2 md:gap-3">
+															<div className="flex items-center bg-gray-50 rounded-full border p-1">
 																<button
 																	onClick={() =>
 																		updateItemQuantity(
@@ -486,7 +493,7 @@ const CreateOrder = () => {
 																			getItemQuantity(product._id) - 1
 																		)
 																	}
-																	className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+																	className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
 																	disabled={getItemQuantity(product._id) === 0}
 																>
 																	<Minus className="w-4 h-4 text-gray-600" />
@@ -501,7 +508,7 @@ const CreateOrder = () => {
 																			getItemQuantity(product._id) + 1
 																		)
 																	}
-																	className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+																	className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
 																>
 																	<Plus className="w-4 h-4 text-gray-600" />
 																</button>
