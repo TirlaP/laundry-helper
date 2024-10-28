@@ -1,3 +1,4 @@
+import { Toaster } from "react-hot-toast";
 import {
 	Navigate,
 	Route,
@@ -29,6 +30,7 @@ const PrivateRoute = ({ children }) => {
 const App = () => {
 	return (
 		<AuthProvider>
+			<Toaster position="top-center" />
 			<Router>
 				<Routes>
 					<Route path="/login" element={<Login />} />

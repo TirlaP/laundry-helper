@@ -1,5 +1,6 @@
 import { Filter, Minus, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/ui/Card";
@@ -11,6 +12,7 @@ const OrderSummary = ({
 	currentOrder,
 	products,
 	updateItemQuantity,
+	handleCancel,
 	handleSaveOrder,
 	t,
 	i18n,
@@ -87,7 +89,7 @@ const OrderSummary = ({
 
 		<div className="flex gap-3 mt-4">
 			<button
-				onClick={() => window.history.back()}
+				onClick={handleCancel}
 				className="flex-1 px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors"
 			>
 				{t("common.cancel")}
@@ -253,17 +255,56 @@ const MobileOrderSummary = ({
 	);
 };
 
+const STORAGE_KEY = "currentOrderDraft";
+
 const CreateOrder = () => {
 	const { user } = useAuth();
 	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
 	const [products, setProducts] = useState([]);
-	const [orderName, setOrderName] = useState("");
-	const [currentOrder, setCurrentOrder] = useState({ items: [], total: 0 });
 	const [loading, setLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
 	const [showFilters, setShowFilters] = useState(false);
+
+	// Load initial state from localStorage
+	const loadInitialState = () => {
+		const savedOrder = localStorage.getItem(STORAGE_KEY);
+		if (savedOrder) {
+			try {
+				const parsed = JSON.parse(savedOrder);
+				return {
+					orderName: parsed.orderName || "",
+					currentOrder: parsed.currentOrder || { items: [], total: 0 },
+				};
+			} catch (error) {
+				console.error("Error parsing saved order:", error);
+				return {
+					orderName: "",
+					currentOrder: { items: [], total: 0 },
+				};
+			}
+		}
+		return {
+			orderName: "",
+			currentOrder: { items: [], total: 0 },
+		};
+	};
+
+	const initialState = loadInitialState();
+	const [orderName, setOrderName] = useState(initialState.orderName);
+	const [currentOrder, setCurrentOrder] = useState(initialState.currentOrder);
+
+	// Save to localStorage whenever order changes
+	useEffect(() => {
+		localStorage.setItem(
+			STORAGE_KEY,
+			JSON.stringify({
+				orderName,
+				currentOrder,
+			})
+		);
+	}, [orderName, currentOrder]);
 
 	useEffect(() => {
 		const fetchProducts = async () => {
@@ -277,6 +318,17 @@ const CreateOrder = () => {
 			}
 		};
 		fetchProducts();
+
+		// Add beforeunload event listener
+		const handleBeforeUnload = (e) => {
+			if (currentOrder.items.length > 0) {
+				e.preventDefault();
+				e.returnValue = "";
+			}
+		};
+
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
 	}, []);
 
 	const organizedProducts = useMemo(() => {
@@ -352,6 +404,41 @@ const CreateOrder = () => {
 		});
 	};
 
+	const handleCancel = () => {
+		if (currentOrder.items.length > 0) {
+			toast(
+				(toastData) => (
+					<div className="flex flex-col gap-2">
+						<div>{t("orders.confirmCancel")}</div>
+						<div className="flex justify-end gap-2">
+							<button
+								className="px-3 py-1 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
+								onClick={() => toast.dismiss(toastData.id)}
+							>
+								{t("common.no")}
+							</button>
+							<button
+								className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
+								onClick={() => {
+									localStorage.removeItem(STORAGE_KEY);
+									toast.dismiss(toastData.id);
+									navigate("/orders");
+								}}
+							>
+								{t("common.yes")}
+							</button>
+						</div>
+					</div>
+				),
+				{
+					duration: Infinity,
+				}
+			);
+		} else {
+			navigate("/orders");
+		}
+	};
+
 	const handleSaveOrder = async () => {
 		try {
 			const orderData = {
@@ -366,10 +453,12 @@ const CreateOrder = () => {
 
 			const response = await apiClient.post("/orders", orderData);
 			if (response.data) {
+				localStorage.removeItem(STORAGE_KEY); // Clear draft after successful save
 				navigate("/orders");
 			}
 		} catch (error) {
 			console.error("Error saving order:", error);
+			toast.error(t("orders.errorSaving"));
 		}
 	};
 
@@ -531,6 +620,7 @@ const CreateOrder = () => {
 							currentOrder={currentOrder}
 							products={products}
 							updateItemQuantity={updateItemQuantity}
+							handleCancel={handleCancel}
 							handleSaveOrder={handleSaveOrder}
 							t={t}
 							i18n={i18n}

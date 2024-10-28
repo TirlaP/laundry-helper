@@ -1,5 +1,6 @@
-import { Edit2, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { Edit2, Plus, Trash2, X } from "lucide-react";
+import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Button from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
@@ -17,6 +18,9 @@ const Products = () => {
 		price: "",
 		category: "",
 	});
+
+	// Get categories from translation file
+	const categories = Object.keys(t("categories", { returnObjects: true }));
 
 	const fetchProducts = async () => {
 		try {
@@ -121,7 +125,9 @@ const Products = () => {
 								<tr key={product._id} className="border-b last:border-b-0">
 									<td className="py-3">{product.name}</td>
 									<td className="py-3">{product.nameEs}</td>
-									<td className="py-3">{product.category}</td>
+									<td className="py-3">
+										{t(`categories.${product.category}`)}
+									</td>
 									<td className="py-3 text-right">
 										${product.price.toFixed(2)}
 									</td>
@@ -150,88 +156,148 @@ const Products = () => {
 				</div>
 			</Card>
 
-			{isModalOpen && (
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-					<div className="bg-white rounded-lg p-6 w-full max-w-md">
-						<h2 className="text-xl font-bold mb-4">
-							{editingProduct
-								? t("products.editProduct")
-								: t("products.addProduct")}
-						</h2>
-						<form onSubmit={handleSubmit} className="space-y-4">
-							<div>
-								<label className="block text-sm font-medium text-gray-700">
-									{t("common.name")}
-								</label>
-								<input
-									type="text"
-									value={formData.name}
-									onChange={(e) =>
-										setFormData({ ...formData, name: e.target.value })
-									}
-									className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-									required
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-gray-700">
-									{t("products.spanishName")}
-								</label>
-								<input
-									type="text"
-									value={formData.nameEs}
-									onChange={(e) =>
-										setFormData({ ...formData, nameEs: e.target.value })
-									}
-									className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-									required
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-gray-700">
-									{t("common.category")}
-								</label>
-								<input
-									type="text"
-									value={formData.category}
-									onChange={(e) =>
-										setFormData({ ...formData, category: e.target.value })
-									}
-									className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-									required
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-gray-700">
-									{t("common.price")}
-								</label>
-								<input
-									type="number"
-									step="0.01"
-									value={formData.price}
-									onChange={(e) =>
-										setFormData({ ...formData, price: e.target.value })
-									}
-									className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-									required
-								/>
-							</div>
-							<div className="flex justify-end space-x-2">
-								<Button
-									variant="secondary"
-									onClick={() => setIsModalOpen(false)}
-									type="button"
-								>
-									{t("common.cancel")}
-								</Button>
-								<Button type="submit">
-									{editingProduct ? t("common.save") : t("common.create")}
-								</Button>
-							</div>
-						</form>
+			<Transition appear show={isModalOpen} as={Fragment}>
+				<Dialog
+					as="div"
+					className="relative z-50"
+					onClose={() => setIsModalOpen(false)}
+				>
+					<Transition.Child
+						as={Fragment}
+						enter="ease-out duration-300"
+						enterFrom="opacity-0"
+						enterTo="opacity-100"
+						leave="ease-in duration-200"
+						leaveFrom="opacity-100"
+						leaveTo="opacity-0"
+					>
+						<div className="fixed inset-0 bg-black bg-opacity-25" />
+					</Transition.Child>
+
+					<div className="fixed inset-0 overflow-y-auto">
+						<div className="flex min-h-full items-center justify-center p-4 text-center">
+							<Transition.Child
+								as={Fragment}
+								enter="ease-out duration-300"
+								enterFrom="opacity-0 scale-95"
+								enterTo="opacity-100 scale-100"
+								leave="ease-in duration-200"
+								leaveFrom="opacity-100 scale-100"
+								leaveTo="opacity-0 scale-95"
+							>
+								<Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+									<div className="flex justify-between items-center mb-6">
+										<Dialog.Title
+											as="h3"
+											className="text-lg font-semibold leading-6 text-gray-900"
+										>
+											{editingProduct
+												? t("products.editProduct")
+												: t("products.addProduct")}
+										</Dialog.Title>
+										<button
+											onClick={() => setIsModalOpen(false)}
+											className="text-gray-400 hover:text-gray-500"
+										>
+											<X className="w-5 h-5" />
+										</button>
+									</div>
+
+									<form onSubmit={handleSubmit} className="space-y-6">
+										<div>
+											<label className="block text-sm font-medium text-gray-700 mb-2">
+												{t("common.name")}
+											</label>
+											<input
+												type="text"
+												value={formData.name}
+												onChange={(e) =>
+													setFormData({ ...formData, name: e.target.value })
+												}
+												className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+												required
+											/>
+										</div>
+
+										<div>
+											<label className="block text-sm font-medium text-gray-700 mb-2">
+												{t("products.spanishName")}
+											</label>
+											<input
+												type="text"
+												value={formData.nameEs}
+												onChange={(e) =>
+													setFormData({ ...formData, nameEs: e.target.value })
+												}
+												className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+												required
+											/>
+										</div>
+
+										<div>
+											<label className="block text-sm font-medium text-gray-700 mb-2">
+												{t("common.category")}
+											</label>
+											<select
+												value={formData.category}
+												onChange={(e) =>
+													setFormData({ ...formData, category: e.target.value })
+												}
+												className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+												required
+											>
+												<option value="">{t("products.selectCategory")}</option>
+												{categories.map((category) => (
+													<option key={category} value={category}>
+														{t(`categories.${category}`)}
+													</option>
+												))}
+											</select>
+										</div>
+
+										<div>
+											<label className="block text-sm font-medium text-gray-700 mb-2">
+												{t("common.price")}
+											</label>
+											<div className="relative rounded-lg">
+												<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+													<span className="text-gray-500 sm:text-sm">$</span>
+												</div>
+												<input
+													type="number"
+													step="0.01"
+													value={formData.price}
+													onChange={(e) =>
+														setFormData({ ...formData, price: e.target.value })
+													}
+													className="block w-full rounded-lg border border-gray-300 pl-7 pr-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+													required
+												/>
+											</div>
+										</div>
+
+										<div className="flex justify-end space-x-3 pt-4">
+											<button
+												type="button"
+												onClick={() => setIsModalOpen(false)}
+												className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+											>
+												{t("common.cancel")}
+											</button>
+											<button
+												type="submit"
+												className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+											>
+												{editingProduct ? t("common.save") : t("common.create")}
+											</button>
+										</div>
+									</form>
+								</Dialog.Panel>
+							</Transition.Child>
+						</div>
 					</div>
-				</div>
-			)}
+				</Dialog>
+			</Transition>
 		</div>
 	);
 };

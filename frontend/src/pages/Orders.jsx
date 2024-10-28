@@ -10,12 +10,22 @@ const Orders = () => {
 	const { t } = useTranslation();
 	const [orders, setOrders] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [filters, setFilters] = useState({
+		viewAll: true,
+		startDate: "",
+		endDate: "",
+	});
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchOrders = async () => {
 			try {
-				const { data } = await apiClient.get("/orders");
+				const params = new URLSearchParams();
+				if (filters.viewAll) params.append("viewAll", "true");
+				if (filters.startDate) params.append("startDate", filters.startDate);
+				if (filters.endDate) params.append("endDate", filters.endDate);
+
+				const { data } = await apiClient.get(`/orders?${params.toString()}`);
 				setOrders(data);
 				setLoading(false);
 			} catch (error) {
@@ -24,7 +34,7 @@ const Orders = () => {
 			}
 		};
 		fetchOrders();
-	}, []);
+	}, [filters]);
 
 	const handleExport = async (order) => {
 		try {
@@ -119,6 +129,63 @@ const Orders = () => {
 		</Card>
 	);
 
+	const FiltersSection = () => (
+		<Card className="p-4 mb-4">
+			<div className="flex flex-col md:flex-row gap-4 items-end">
+				<div className="flex-1">
+					<label className="block text-sm font-medium text-gray-700 mb-1">
+						{t("orders.viewOption")}
+					</label>
+					<select
+						className="w-full border rounded-md p-2"
+						value={filters.viewAll ? "all" : "mine"}
+						onChange={(e) =>
+							setFilters((prev) => ({
+								...prev,
+								viewAll: e.target.value === "all",
+							}))
+						}
+					>
+						<option value="mine">{t("orders.myOrders")}</option>
+						<option value="all">{t("orders.allOrders")}</option>
+					</select>
+				</div>
+				<div className="flex-1">
+					<label className="block text-sm font-medium text-gray-700 mb-1">
+						{t("orders.startDate")}
+					</label>
+					<input
+						type="date"
+						className="w-full border rounded-md p-2"
+						value={filters.startDate}
+						onChange={(e) =>
+							setFilters((prev) => ({
+								...prev,
+								startDate: e.target.value,
+							}))
+						}
+					/>
+				</div>
+				<div className="flex-1">
+					<label className="block text-sm font-medium text-gray-700 mb-1">
+						{t("orders.endDate")}
+					</label>
+					<input
+						type="date"
+						className="w-full border rounded-md p-2"
+						value={filters.endDate}
+						onChange={(e) =>
+							setFilters((prev) => ({
+								...prev,
+								endDate: e.target.value,
+							}))
+						}
+					/>
+				</div>
+			</div>
+		</Card>
+	);
+
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -139,6 +206,8 @@ const Orders = () => {
 					{t("orders.newOrder")}
 				</button>
 			</div>
+
+			<FiltersSection />
 
 			{/* Desktop view */}
 			<div className="hidden md:block">

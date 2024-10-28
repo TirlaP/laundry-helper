@@ -54,10 +54,32 @@ export const createOrder = async (req, res) => {
 
 export const getOrders = async (req, res) => {
 	try {
-		const orders = await Order.find({ user: req.user.id })
+		const query = {};
+
+		// Only filter by user if viewAll is not true
+		if (req.query.viewAll !== "true") {
+			query.user = req.user.id;
+		}
+
+		// Add date filters if provided
+		if (req.query.startDate) {
+			query.createdAt = {
+				...query.createdAt,
+				$gte: new Date(req.query.startDate),
+			};
+		}
+		if (req.query.endDate) {
+			query.createdAt = {
+				...query.createdAt,
+				$lte: new Date(req.query.endDate),
+			};
+		}
+
+		const orders = await Order.find(query)
 			.populate("items.product")
-			.populate("user", "displayName") // Add this to get user info
+			.populate("user", "displayName")
 			.sort({ createdAt: -1 });
+
 		res.status(200).json(orders);
 	} catch (error) {
 		res.status(500).json({ message: error.message });

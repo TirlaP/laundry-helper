@@ -31,12 +31,14 @@ const en = {
 		createdBy: "Created By",
 		email: "Email",
 		username: "Username",
+		yes: "Yes",
+		no: "No",
 	},
 	categories: {
 		"Mattress Pads": "Mattress Pads",
 		Blankets: "Blankets",
 		"Duvet Covers": "Duvet Covers",
-		Comforters: "Comforters",
+		Comforters: "Comforter Inserter",
 		"Pillow Shams": "Pillow Shams",
 		"Bed Skirts": "Bed Skirts",
 		Bathroom: "Bathroom",
@@ -100,6 +102,15 @@ const en = {
 		confirmDelete: "Are you sure you want to delete this order?",
 		notFound: "Order not found",
 		orderItems: "Order Items",
+		viewOption: "View Orders",
+		myOrders: "My Orders",
+		allOrders: "All Orders",
+		startDate: "Start Date",
+		endDate: "End Date",
+		filterOrders: "Filter Orders",
+		confirmCancel:
+			"Are you sure you want to cancel this order? All items will be lost.",
+		errorSaving: "Error saving order. Please try again.",
 	},
 	products: {
 		title: "Products",
@@ -107,6 +118,7 @@ const en = {
 		editProduct: "Edit Product",
 		spanishName: "Spanish Name",
 		confirmDelete: "Are you sure you want to delete this product?",
+		selectCategory: "Select a category",
 	},
 };
 
@@ -137,6 +149,8 @@ const es = {
 		create: "Crear",
 		update: "Actualizar",
 		appName: "Laundry Helper",
+		yes: "Sí",
+		no: "No",
 	},
 	categories: {
 		"Mattress Pads": "Protectores de Colchón",
@@ -200,6 +214,15 @@ const es = {
 		confirmDelete: "¿Seguro que quieres borrar este pedido?",
 		notFound: "Pedido no encontrado",
 		orderItems: "Artículos del Pedido",
+		viewOption: "Ver Pedidos",
+		myOrders: "Mis Pedidos",
+		allOrders: "Todos los Pedidos",
+		startDate: "Fecha Inicial",
+		endDate: "Fecha Final",
+		filterOrders: "Filtrar Pedidos",
+		confirmCancel:
+			"¿Estás seguro de que quieres cancelar este pedido? Se perderán todos los artículos.",
+		errorSaving: "Error al guardar el pedido. Por favor, inténtalo de nuevo.",
 	},
 	products: {
 		title: "Productos",
