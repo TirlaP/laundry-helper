@@ -6,6 +6,7 @@ import http from "http";
 import mongoose from "mongoose";
 import { errorLogger, loggerMiddleware } from "./src/middleware/logger.js";
 import authRoutes from "./src/routes/auth.routes.js";
+import dashboardRoutes from "./src/routes/dashboard.routes.js";
 import orderRoutes from "./src/routes/order.routes.js";
 import productRoutes from "./src/routes/product.routes.js";
 
@@ -59,6 +60,7 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Health check route
 app.get("/api/health-check", (req, res) => {

@@ -1,4 +1,4 @@
-import { Filter, Minus, Plus, Search } from "lucide-react";
+import { Filter, Loader2, Minus, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -7,13 +7,14 @@ import { Card } from "../components/ui/Card";
 import { useAuth } from "../contexts/AuthContext";
 import apiClient from "../utils/apiClient";
 
-// OrderSummary Component with quantity controls
+// OrderSummary Component with quantity controls and loading state
 const OrderSummary = ({
 	currentOrder,
 	products,
 	updateItemQuantity,
 	handleCancel,
 	handleSaveOrder,
+	isLoading,
 	t,
 	i18n,
 }) => (
@@ -52,6 +53,7 @@ const OrderSummary = ({
 											updateItemQuantity(product, item.quantity - 1);
 										}}
 										className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
+										disabled={isLoading}
 									>
 										<Minus className="w-4 h-4 text-gray-600" />
 									</button>
@@ -66,6 +68,7 @@ const OrderSummary = ({
 											updateItemQuantity(product, item.quantity + 1);
 										}}
 										className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
+										disabled={isLoading}
 									>
 										<Plus className="w-4 h-4 text-gray-600" />
 									</button>
@@ -90,27 +93,30 @@ const OrderSummary = ({
 		<div className="flex gap-3 mt-4">
 			<button
 				onClick={handleCancel}
-				className="flex-1 px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors"
+				disabled={isLoading}
+				className="flex-1 px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{t("common.cancel")}
 			</button>
 			<button
 				onClick={handleSaveOrder}
-				disabled={currentOrder.items.length === 0}
-				className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+				disabled={currentOrder.items.length === 0 || isLoading}
+				className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
 			>
-				{t("common.save")}
+				{isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+				{isLoading ? t("common.saving") : t("common.save")}
 			</button>
 		</div>
 	</div>
 );
 
-// MobileOrderSummary Component
+// Mobile Order Summary with loading state
 const MobileOrderSummary = ({
 	currentOrder,
 	products,
 	updateItemQuantity,
 	handleSaveOrder,
+	isLoading,
 	t,
 	i18n,
 }) => {
@@ -201,6 +207,7 @@ const MobileOrderSummary = ({
 																updateItemQuantity(product, item.quantity - 1);
 															}}
 															className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
+															disabled={isLoading}
 														>
 															<Minus className="w-4 h-4 text-gray-600" />
 														</button>
@@ -216,6 +223,7 @@ const MobileOrderSummary = ({
 																updateItemQuantity(product, item.quantity + 1);
 															}}
 															className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
+															disabled={isLoading}
 														>
 															<Plus className="w-4 h-4 text-gray-600" />
 														</button>
@@ -236,16 +244,18 @@ const MobileOrderSummary = ({
 						<div className="flex gap-3 max-w-md mx-auto">
 							<button
 								onClick={() => window.history.back()}
-								className="flex-1 px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors"
+								disabled={isLoading}
+								className="flex-1 px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{t("common.cancel")}
 							</button>
 							<button
 								onClick={handleSaveOrder}
-								disabled={currentOrder.items.length === 0}
-								className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+								disabled={currentOrder.items.length === 0 || isLoading}
+								className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
 							>
-								{t("common.save")}
+								{isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+								{isLoading ? t("common.saving") : t("common.save")}
 							</button>
 						</div>
 					</div>
@@ -263,6 +273,7 @@ const CreateOrder = () => {
 	const navigate = useNavigate();
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [isSaving, setIsSaving] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
 	const [showFilters, setShowFilters] = useState(false);
@@ -440,6 +451,9 @@ const CreateOrder = () => {
 	};
 
 	const handleSaveOrder = async () => {
+		if (isSaving) return;
+
+		setIsSaving(true);
 		try {
 			const orderData = {
 				name: orderName,
@@ -459,13 +473,18 @@ const CreateOrder = () => {
 		} catch (error) {
 			console.error("Error saving order:", error);
 			toast.error(t("orders.errorSaving"));
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center h-full">
-				{t("common.loading")}
+				<div className="flex items-center space-x-2">
+					<Loader2 className="w-5 h-5 animate-spin" />
+					<span>{t("common.loading")}</span>
+				</div>
 			</div>
 		);
 	}
@@ -488,7 +507,8 @@ const CreateOrder = () => {
 									placeholder={t("orders.orderNamePlaceholder")}
 									value={orderName}
 									onChange={(e) => setOrderName(e.target.value)}
-									className="w-full px-3 md:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
+									disabled={isSaving}
+									className="w-full px-3 md:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base disabled:opacity-50 disabled:bg-gray-100"
 								/>
 
 								<div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
@@ -499,12 +519,14 @@ const CreateOrder = () => {
 											placeholder={t("orders.searchProducts")}
 											value={searchQuery}
 											onChange={(e) => setSearchQuery(e.target.value)}
-											className="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
+											disabled={isSaving}
+											className="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base disabled:opacity-50 disabled:bg-gray-100"
 										/>
 									</div>
 									<button
 										onClick={() => setShowFilters(!showFilters)}
-										className="px-4 py-2 border rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors sm:w-auto"
+										disabled={isSaving}
+										className="px-4 py-2 border rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors sm:w-auto disabled:opacity-50 disabled:bg-gray-100"
 									>
 										<Filter className="w-4 h-4" />
 										{t("common.filters")}
@@ -515,11 +537,12 @@ const CreateOrder = () => {
 									<div className="flex flex-wrap gap-2 p-3 md:p-4 bg-gray-50 rounded-lg">
 										<button
 											onClick={() => setSelectedCategory("all")}
+											disabled={isSaving}
 											className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
 												selectedCategory === "all"
 													? "bg-blue-600 text-white"
 													: "bg-white border hover:bg-gray-50"
-											}`}
+											} disabled:opacity-50`}
 										>
 											{t("common.all")}
 										</button>
@@ -527,11 +550,12 @@ const CreateOrder = () => {
 											<button
 												key={category}
 												onClick={() => setSelectedCategory(category)}
+												disabled={isSaving}
 												className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
 													selectedCategory === category
 														? "bg-blue-600 text-white"
 														: "bg-white border hover:bg-gray-50"
-												}`}
+												} disabled:opacity-50`}
 											>
 												{t(`categories.${category}`)}
 											</button>
@@ -582,8 +606,11 @@ const CreateOrder = () => {
 																			getItemQuantity(product._id) - 1
 																		)
 																	}
-																	className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
-																	disabled={getItemQuantity(product._id) === 0}
+																	disabled={
+																		getItemQuantity(product._id) === 0 ||
+																		isSaving
+																	}
+																	className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
 																>
 																	<Minus className="w-4 h-4 text-gray-600" />
 																</button>
@@ -597,7 +624,8 @@ const CreateOrder = () => {
 																			getItemQuantity(product._id) + 1
 																		)
 																	}
-																	className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors"
+																	disabled={isSaving}
+																	className="w-8 h-8 flex items-center justify-center rounded-full border bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
 																>
 																	<Plus className="w-4 h-4 text-gray-600" />
 																</button>
@@ -622,6 +650,7 @@ const CreateOrder = () => {
 							updateItemQuantity={updateItemQuantity}
 							handleCancel={handleCancel}
 							handleSaveOrder={handleSaveOrder}
+							isLoading={isSaving}
 							t={t}
 							i18n={i18n}
 						/>
@@ -635,6 +664,7 @@ const CreateOrder = () => {
 						products={products}
 						updateItemQuantity={updateItemQuantity}
 						handleSaveOrder={handleSaveOrder}
+						isLoading={isSaving}
 						t={t}
 						i18n={i18n}
 					/>

@@ -19,12 +19,8 @@ export const AuthProvider = ({ children }) => {
 			const token = localStorage.getItem("token");
 			if (token) {
 				try {
-					// Optional: Verify token with backend
-					// const { data } = await apiClient.get("/auth/verify");
-					// setUser(data.user);
-
-					// For now, just set a basic user object if token exists
-					setUser({ username: "User" }); // You might want to store username in localStorage too
+					const { data } = await apiClient.get("/auth/verify");
+					setUser(data.user);
 				} catch (error) {
 					console.error("Token verification failed:", error);
 					localStorage.removeItem("token");
@@ -56,24 +52,12 @@ export const AuthProvider = ({ children }) => {
 		setUser(null);
 	}, []);
 
-	const register = useCallback(async (email, username, password) => {
-		try {
-			const { data } = await apiClient.post("/auth/register", {
-				email,
-				username,
-				password,
-			});
-			localStorage.setItem("token", data.token);
-			setUser(data.user);
-			return true;
-		} catch (error) {
-			console.error("Registration error:", error);
-			throw error;
-		}
-	}, []);
+	const isAdmin = useCallback(() => {
+		return user?.role === "admin";
+	}, [user]);
 
 	return (
-		<AuthContext.Provider value={{ user, login, logout, register, loading }}>
+		<AuthContext.Provider value={{ user, login, logout, loading, isAdmin }}>
 			{children}
 		</AuthContext.Provider>
 	);

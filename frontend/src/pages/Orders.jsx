@@ -1,40 +1,87 @@
 import { format } from "date-fns";
-import { Download, Edit, Eye, Plus, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Download, Edit, Eye, Loader2, Plus, Trash } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/ui/Card";
+import { useAuth } from "../contexts/AuthContext";
 import apiClient from "../utils/apiClient";
 
 const Orders = () => {
 	const { t } = useTranslation();
+	const { user } = useAuth();
 	const [orders, setOrders] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [page, setPage] = useState(1);
+	const [hasMore, setHasMore] = useState(true);
 	const [filters, setFilters] = useState({
 		viewAll: true,
 		startDate: "",
 		endDate: "",
 	});
+	const loader = useRef(null);
 	const navigate = useNavigate();
 
-	useEffect(() => {
-		const fetchOrders = async () => {
-			try {
-				const params = new URLSearchParams();
-				if (filters.viewAll) params.append("viewAll", "true");
-				if (filters.startDate) params.append("startDate", filters.startDate);
-				if (filters.endDate) params.append("endDate", filters.endDate);
+	const fetchOrders = async (pageNum = 1, append = false) => {
+		try {
+			const params = new URLSearchParams();
+			params.append("page", pageNum);
+			params.append("limit", 10);
+			if (filters.viewAll) params.append("viewAll", "true");
+			if (filters.startDate) params.append("startDate", filters.startDate);
+			if (filters.endDate) params.append("endDate", filters.endDate);
 
-				const { data } = await apiClient.get(`/orders?${params.toString()}`);
-				setOrders(data);
-				setLoading(false);
-			} catch (error) {
-				console.error("Error fetching orders:", error);
-				setLoading(false);
+			const { data } = await apiClient.get(`/orders?${params.toString()}`);
+			if (append) {
+				setOrders((prev) => [...prev, ...data.orders]);
+			} else {
+				setOrders(data.orders);
 			}
+			setHasMore(data.pagination.hasMore);
+			setLoading(false);
+		} catch (error) {
+			console.error("Error fetching orders:", error);
+			toast.error(t("orders.fetchError"));
+			setLoading(false);
+		}
+	};
+
+	const handleObserver = useCallback(
+		(entries) => {
+			const target = entries[0];
+			if (target.isIntersecting && hasMore && !loading) {
+				setPage((prev) => prev + 1);
+			}
+		},
+		[hasMore, loading]
+	);
+
+	useEffect(() => {
+		const option = {
+			root: null,
+			rootMargin: "20px",
+			threshold: 0,
 		};
-		fetchOrders();
+		const observer = new IntersectionObserver(handleObserver, option);
+		if (loader.current) observer.observe(loader.current);
+
+		return () => {
+			if (loader.current) observer.unobserve(loader.current);
+		};
+	}, [handleObserver]);
+
+	useEffect(() => {
+		setLoading(true);
+		setPage(1);
+		fetchOrders(1, false);
 	}, [filters]);
+
+	useEffect(() => {
+		if (page > 1) {
+			fetchOrders(page, true);
+		}
+	}, [page]);
 
 	const handleExport = async (order) => {
 		try {
@@ -54,6 +101,7 @@ const Orders = () => {
 			link.remove();
 		} catch (err) {
 			console.error("Error exporting order:", err);
+			toast.error(t("orders.exportError"));
 		}
 	};
 
@@ -62,10 +110,17 @@ const Orders = () => {
 			try {
 				await apiClient.delete(`/orders/${orderId}`);
 				setOrders(orders.filter((order) => order._id !== orderId));
+				toast.success(t("orders.deleteSuccess"));
 			} catch (err) {
 				console.error("Error deleting order:", err);
+				toast.error(t("orders.deleteError"));
 			}
 		}
+	};
+
+	// Can delete if admin or if it's user's own order
+	const canDelete = (order) => {
+		return user.role === "admin" || order.user === user.id;
 	};
 
 	// Mobile Order Card Component
@@ -81,6 +136,9 @@ const Orders = () => {
 						<p className="text-sm text-gray-500 mt-1">
 							{format(new Date(order.createdAt), "MMM dd, yyyy")}
 						</p>
+						<p className="text-sm text-gray-600 mt-1">
+							{t("common.by")} {order.createdBy}
+						</p>
 					</div>
 					<div className="text-right">
 						<div className="font-bold">${order.total.toFixed(2)}</div>
@@ -89,10 +147,6 @@ const Orders = () => {
 							{order.items.length === 1 ? t("common.item") : t("common.items")}
 						</div>
 					</div>
-				</div>
-
-				<div>
-					<p className="text-sm text-gray-600">{order.createdBy}</p>
 				</div>
 
 				<div className="flex justify-end space-x-2 pt-2">
@@ -117,13 +171,15 @@ const Orders = () => {
 					>
 						<Edit className="w-4 h-4" />
 					</button>
-					<button
-						onClick={() => handleDelete(order._id)}
-						className="p-2 text-red-600 hover:text-red-700"
-						title={t("common.delete")}
-					>
-						<Trash className="w-4 h-4" />
-					</button>
+					{canDelete(order) && (
+						<button
+							onClick={() => handleDelete(order._id)}
+							className="p-2 text-red-600 hover:text-red-700"
+							title={t("common.delete")}
+						>
+							<Trash className="w-4 h-4" />
+						</button>
+					)}
 				</div>
 			</div>
 		</Card>
@@ -186,9 +242,10 @@ const Orders = () => {
 		</Card>
 	);
 
-	if (loading) {
+	if (loading && page === 1) {
 		return (
 			<div className="flex items-center justify-center h-full">
+				<Loader2 className="w-6 h-6 animate-spin mr-2" />
 				<div className="text-lg">{t("common.loading")}</div>
 			</div>
 		);
@@ -277,13 +334,15 @@ const Orders = () => {
 												>
 													<Edit className="w-4 h-4" />
 												</button>
-												<button
-													onClick={() => handleDelete(order._id)}
-													className="text-red-600 hover:text-red-700"
-													title={t("common.delete")}
-												>
-													<Trash className="w-4 h-4" />
-												</button>
+												{canDelete(order) && (
+													<button
+														onClick={() => handleDelete(order._id)}
+														className="text-red-600 hover:text-red-700"
+														title={t("common.delete")}
+													>
+														<Trash className="w-4 h-4" />
+													</button>
+												)}
 											</div>
 										</td>
 									</tr>
@@ -299,6 +358,16 @@ const Orders = () => {
 				{orders.map((order) => (
 					<OrderCard key={order._id} order={order} />
 				))}
+			</div>
+
+			{/* Loading indicator and infinite scroll trigger */}
+			<div ref={loader} className="h-10 flex items-center justify-center">
+				{loading && page > 1 && (
+					<div className="flex items-center text-gray-600">
+						<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+						{t("common.loading")}
+					</div>
+				)}
 			</div>
 		</div>
 	);

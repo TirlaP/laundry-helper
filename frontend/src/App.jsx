@@ -15,16 +15,24 @@ import Login from "./pages/Login";
 import OrderDetails from "./pages/OrderDetails";
 import Orders from "./pages/Orders";
 import Products from "./pages/Products";
-import Register from "./pages/Register";
+import Users from "./pages/Users";
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children, requireAdmin = false }) => {
 	const { user, loading } = useAuth();
 
 	if (loading) {
 		return <div>Loading...</div>;
 	}
 
-	return user ? children : <Navigate to="/login" />;
+	if (!user) {
+		return <Navigate to="/login" />;
+	}
+
+	if (requireAdmin && user.role !== "admin") {
+		return <Navigate to="/" />;
+	}
+
+	return children;
 };
 
 const App = () => {
@@ -34,7 +42,6 @@ const App = () => {
 			<Router>
 				<Routes>
 					<Route path="/login" element={<Login />} />
-					<Route path="/register" element={<Register />} />
 					<Route
 						path="/"
 						element={
@@ -49,6 +56,14 @@ const App = () => {
 						<Route path="/orders/:id/edit" element={<EditOrder />} />
 						<Route path="products" element={<Products />} />
 						<Route path="orders/create" element={<CreateOrder />} />
+						<Route
+							path="users"
+							element={
+								<PrivateRoute requireAdmin={true}>
+									<Users />
+								</PrivateRoute>
+							}
+						/>
 					</Route>
 				</Routes>
 			</Router>

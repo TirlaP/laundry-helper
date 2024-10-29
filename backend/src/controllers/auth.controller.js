@@ -6,6 +6,13 @@ export const register = async (req, res) => {
 	try {
 		const { email, username, password } = req.body;
 
+		// Check if request is from an admin
+		if (!req.user?.role === "admin") {
+			return res.status(403).json({
+				message: "Only administrators can create new users",
+			});
+		}
+
 		// Add input validation
 		if (!email || !username || !password) {
 			return res.status(400).json({
@@ -18,19 +25,12 @@ export const register = async (req, res) => {
 			});
 		}
 
-		// Log incoming request data (remove in production)
-		console.log("Registration attempt:", { email, username });
-
 		// Case-insensitive email check
 		const existingEmail = await User.findOne({
 			email: { $regex: new RegExp(`^${email}$`, "i") },
 		});
 
 		if (existingEmail) {
-			console.log("Email collision found:", {
-				attempted: email,
-				existing: existingEmail.email,
-			});
 			return res.status(400).json({
 				message: "Email already exists",
 				field: "email",
@@ -43,10 +43,6 @@ export const register = async (req, res) => {
 		});
 
 		if (existingUsername) {
-			console.log("Username collision found:", {
-				attempted: username,
-				existing: existingUsername.username,
-			});
 			return res.status(400).json({
 				message: "Username already exists",
 				field: "username",
@@ -58,35 +54,21 @@ export const register = async (req, res) => {
 
 		// Create new user
 		const user = new User({
-			email: email.toLowerCase(), // Store email in lowercase
+			email: email.toLowerCase(),
 			username,
 			password: hashedPassword,
+			role: "member", // New users are always members
 		});
 
 		await user.save();
-		console.log("User created successfully:", {
-			id: user._id,
-			email: user.email,
-		});
-
-		// Generate token
-		const token = jwt.sign(
-			{
-				id: user._id,
-				email: user.email,
-				username: user.username,
-			},
-			process.env.JWT_SECRET,
-			{ expiresIn: "1d" }
-		);
 
 		res.status(201).json({
 			message: "User created successfully",
-			token,
 			user: {
 				id: user._id,
 				email: user.email,
 				username: user.username,
+				role: user.role,
 			},
 		});
 	} catch (error) {
@@ -123,6 +105,7 @@ export const login = async (req, res) => {
 				id: user._id,
 				email: user.email,
 				username: user.username,
+				role: user.role,
 			},
 			process.env.JWT_SECRET,
 			{ expiresIn: "1d" }
@@ -134,6 +117,83 @@ export const login = async (req, res) => {
 				id: user._id,
 				email: user.email,
 				username: user.username,
+				role: user.role,
+			},
+		});
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+// New endpoint to create initial admin user
+export const createInitialAdmin = async (req, res) => {
+	try {
+		const adminCount = await User.countDocuments({ role: "admin" });
+		if (adminCount > 0) {
+			return res.status(400).json({ message: "Admin user already exists" });
+		}
+
+		const hashedPassword = await bcrypt.hash(
+			process.env.INITIAL_ADMIN_PASSWORD,
+			12
+		);
+		const admin = new User({
+			email: process.env.INITIAL_ADMIN_EMAIL,
+			username: "admin",
+			password: hashedPassword,
+			role: "admin",
+		});
+
+		await admin.save();
+		res.status(201).json({ message: "Admin user created successfully" });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const getUsers = async (req, res) => {
+	try {
+		if (req.user.role !== "admin") {
+			return res.status(403).json({ message: "Access denied" });
+		}
+
+		const users = await User.find({}, { password: 0 });
+		res.status(200).json(users);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const deleteUser = async (req, res) => {
+	try {
+		if (req.user.role !== "admin") {
+			return res.status(403).json({ message: "Access denied" });
+		}
+
+		const user = await User.findByIdAndDelete(req.params.id);
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		res.status(200).json({ message: "User deleted successfully" });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const verifyToken = async (req, res) => {
+	try {
+		const user = await User.findById(req.user.id).select("-password");
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		res.json({
+			user: {
+				id: user._id,
+				email: user.email,
+				username: user.username,
+				role: user.role,
 			},
 		});
 	} catch (error) {

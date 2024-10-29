@@ -1,24 +1,22 @@
 import { format } from "date-fns";
-import { DollarSign, Download, Edit, Eye, Package, Trash } from "lucide-react";
+import {
+	DollarSign,
+	Download,
+	Edit,
+	Eye,
+	Package,
+	Trash,
+	Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/ui/Card";
+import { useAuth } from "../contexts/AuthContext";
 import apiClient from "../utils/apiClient";
 
-// Utility function to format numbers with k/m suffix
-const formatNumber = (num) => {
-	if (num >= 1000000) {
-		return `${(num / 1000000).toFixed(1)}m`;
-	}
-	if (num >= 1000) {
-		return `${(num / 1000).toFixed(1)}k`;
-	}
-	return num.toFixed(2);
-};
-
 // Mobile Order Card Component
-const OrderCard = ({ order, onExport, onDelete, navigate, t }) => (
+const OrderCard = ({ order, onExport, onDelete, navigate, t, user }) => (
 	<Card className="mb-4 p-4">
 		<div className="space-y-2">
 			<div className="flex justify-between items-start">
@@ -29,6 +27,9 @@ const OrderCard = ({ order, onExport, onDelete, navigate, t }) => (
 					</div>
 					<p className="text-sm text-gray-500 mt-1">
 						{format(new Date(order.createdAt), "MMM dd, yyyy")}
+					</p>
+					<p className="text-sm text-gray-600 mt-1">
+						{t("common.by")} {order.createdBy}
 					</p>
 				</div>
 				<div className="text-right">
@@ -62,13 +63,16 @@ const OrderCard = ({ order, onExport, onDelete, navigate, t }) => (
 				>
 					<Edit className="w-4 h-4" />
 				</button>
-				<button
-					onClick={() => onDelete(order._id)}
-					className="p-2 text-red-600 hover:text-red-700"
-					title={t("common.delete")}
-				>
-					<Trash className="w-4 h-4" />
-				</button>
+				{order.user === order.user.id ||
+					(user.role === "admin" && (
+						<button
+							onClick={() => onDelete(order._id)}
+							className="p-2 text-red-600 hover:text-red-700"
+							title={t("common.delete")}
+						>
+							<Trash className="w-4 h-4" />
+						</button>
+					))}
 			</div>
 		</div>
 	</Card>
@@ -77,10 +81,13 @@ const OrderCard = ({ order, onExport, onDelete, navigate, t }) => (
 const Dashboard = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
+	const { user } = useAuth();
 	const [stats, setStats] = useState({
 		totalOrders: 0,
 		totalRevenue: 0,
 		averageOrderValue: 0,
+		totalUsers: 0,
+		isAdmin: false,
 	});
 	const [recentOrders, setRecentOrders] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -88,16 +95,17 @@ const Dashboard = () => {
 	useEffect(() => {
 		const fetchDashboardData = async () => {
 			try {
-				const { data: orders } = await apiClient.get("/orders");
-				const total = orders.reduce((sum, order) => sum + order.total, 0);
+				const { data } = await apiClient.get("/dashboard/stats");
 
 				setStats({
-					totalOrders: orders.length,
-					totalRevenue: total,
-					averageOrderValue: orders.length ? total / orders.length : 0,
+					totalOrders: Math.floor(data.stats.totalOrders),
+					totalRevenue: data.stats.totalRevenue,
+					averageOrderValue: data.stats.averageOrderValue,
+					totalUsers: data.stats.totalUsers,
+					isAdmin: data.stats.isAdmin,
 				});
 
-				setRecentOrders(orders.slice(0, 5));
+				setRecentOrders(data.recentOrders);
 				setLoading(false);
 			} catch (error) {
 				console.error("Error fetching dashboard data:", error);
@@ -131,16 +139,34 @@ const Dashboard = () => {
 			try {
 				await apiClient.delete(`/orders/${orderId}`);
 				setRecentOrders(recentOrders.filter((order) => order._id !== orderId));
+				// Update total orders count
+				setStats((prev) => ({
+					...prev,
+					totalOrders: prev.totalOrders - 1,
+				}));
 			} catch (err) {
 				console.error("Error deleting order:", err);
 			}
 		}
 	};
 
+	const formatCurrency = (value) => {
+		if (value >= 1000000) {
+			return `$${(value / 1000000).toFixed(1)}M`;
+		}
+		if (value >= 1000) {
+			return `$${(value / 1000).toFixed(1)}K`;
+		}
+		return `$${value.toFixed(2)}`;
+	};
+
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center h-full">
-				<div className="text-lg">{t("common.loading")}</div>
+				<div className="text-lg flex items-center">
+					<div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+					{t("common.loading")}
+				</div>
 			</div>
 		);
 	}
@@ -149,7 +175,13 @@ const Dashboard = () => {
 		<div className="space-y-6">
 			<h1 className="text-2xl font-bold">{t("dashboard.title")}</h1>
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+			<div
+				className={`grid grid-cols-1 gap-4 ${
+					stats.isAdmin
+						? "sm:grid-cols-2 lg:grid-cols-4"
+						: "sm:grid-cols-2 lg:grid-cols-3"
+				}`}
+			>
 				<Card className="p-6">
 					<div className="flex items-center justify-between">
 						<div>
@@ -171,7 +203,7 @@ const Dashboard = () => {
 								{t("dashboard.totalRevenue")}
 							</p>
 							<h3 className="text-2xl font-bold mt-1">
-								${formatNumber(stats.totalRevenue)}
+								{formatCurrency(stats.totalRevenue)}
 							</h3>
 						</div>
 						<div className="p-3 bg-blue-50 rounded-full">
@@ -180,14 +212,16 @@ const Dashboard = () => {
 					</div>
 				</Card>
 
-				<Card className="p-6 sm:col-span-2 md:col-span-1">
+				<Card
+					className={`p-6 ${!stats.isAdmin && "sm:col-span-2 lg:col-span-1"}`}
+				>
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-sm text-gray-600">
 								{t("dashboard.averageOrderValue")}
 							</p>
 							<h3 className="text-2xl font-bold mt-1">
-								${formatNumber(stats.averageOrderValue)}
+								{formatCurrency(stats.averageOrderValue)}
 							</h3>
 						</div>
 						<div className="p-3 bg-blue-50 rounded-full">
@@ -195,6 +229,23 @@ const Dashboard = () => {
 						</div>
 					</div>
 				</Card>
+
+				{/* Only show total users card for admin */}
+				{stats.isAdmin && (
+					<Card className="p-6">
+						<div className="flex items-center justify-between">
+							<div>
+								<p className="text-sm text-gray-600">
+									{t("dashboard.totalUsers")}
+								</p>
+								<h3 className="text-2xl font-bold mt-1">{stats.totalUsers}</h3>
+							</div>
+							<div className="p-3 bg-blue-50 rounded-full">
+								<Users className="w-6 h-6 text-blue-500" />
+							</div>
+						</div>
+					</Card>
+				)}
 			</div>
 
 			{/* Desktop view */}
@@ -212,6 +263,9 @@ const Dashboard = () => {
 									</th>
 									<th className="pb-3 font-semibold">{t("common.name")}</th>
 									<th className="pb-3 font-semibold">{t("common.date")}</th>
+									<th className="pb-3 font-semibold">
+										{t("orders.createdBy")}
+									</th>
 									<th className="pb-3 font-semibold">{t("common.items")}</th>
 									<th className="pb-3 font-semibold text-right">
 										{t("common.total")}
@@ -232,6 +286,7 @@ const Dashboard = () => {
 										<td className="py-3">
 											{format(new Date(order.createdAt), "MMM dd, yyyy")}
 										</td>
+										<td className="py-3">{order.createdBy}</td>
 										<td className="py-3">
 											{order.items.length}{" "}
 											{order.items.length === 1
@@ -266,13 +321,15 @@ const Dashboard = () => {
 												>
 													<Edit className="w-4 h-4" />
 												</button>
-												<button
-													onClick={() => handleDelete(order._id)}
-													className="p-2 text-red-600 hover:text-red-700"
-													title={t("common.delete")}
-												>
-													<Trash className="w-4 h-4" />
-												</button>
+												{(order.user === user.id || user.role === "admin") && (
+													<button
+														onClick={() => handleDelete(order._id)}
+														className="p-2 text-red-600 hover:text-red-700"
+														title={t("common.delete")}
+													>
+														<Trash className="w-4 h-4" />
+													</button>
+												)}
 											</div>
 										</td>
 									</tr>
@@ -296,6 +353,7 @@ const Dashboard = () => {
 						onDelete={handleDelete}
 						navigate={navigate}
 						t={t}
+						user={user}
 					/>
 				))}
 			</div>

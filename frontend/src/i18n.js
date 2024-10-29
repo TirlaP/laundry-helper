@@ -33,6 +33,10 @@ const en = {
 		username: "Username",
 		yes: "Yes",
 		no: "No",
+		view: "View",
+		admin: "Admin",
+		member: "Member",
+		by: "by",
 	},
 	categories: {
 		"Mattress Pads": "Mattress Pads",
@@ -56,6 +60,7 @@ const en = {
 		products: "Products",
 		createOrder: "Create Order",
 		language: "Language",
+		users: "Users",
 	},
 	auth: {
 		username: "Username",
@@ -77,6 +82,7 @@ const en = {
 		totalRevenue: "Total Revenue",
 		averageOrderValue: "Average Order Value",
 		recentOrders: "Recent Orders",
+		totalUsers: "Total Users",
 	},
 	orders: {
 		title: "Orders",
@@ -90,7 +96,7 @@ const en = {
 		status: "Status",
 		export: "Export",
 		view: "View",
-		createdBy: "Created By", // Added here
+		createdBy: "Created By",
 		availableProducts: "Available Products",
 		searchProducts: "Search products...",
 		noItems: "No items added",
@@ -111,6 +117,11 @@ const en = {
 		confirmCancel:
 			"Are you sure you want to cancel this order? All items will be lost.",
 		errorSaving: "Error saving order. Please try again.",
+		saving: "Saving...",
+		fetchError: "Error loading orders",
+		exportError: "Error exporting order",
+		deleteError: "Error deleting order",
+		deleteSuccess: "Order deleted successfully",
 	},
 	products: {
 		title: "Products",
@@ -119,6 +130,25 @@ const en = {
 		spanishName: "Spanish Name",
 		confirmDelete: "Are you sure you want to delete this product?",
 		selectCategory: "Select a category",
+		fetchError: "Error loading products",
+		createSuccess: "Product created successfully",
+		updateSuccess: "Product updated successfully",
+		deleteSuccess: "Product deleted successfully",
+		deleteError: "Error deleting product",
+		saveError: "Error saving product",
+	},
+	users: {
+		title: "Users",
+		addUser: "Add User",
+		username: "Username",
+		email: "Email",
+		createdAt: "Created At",
+		confirmDelete: "Are you sure you want to delete this user?",
+		createSuccess: "User created successfully",
+		createError: "Error creating user",
+		deleteSuccess: "User deleted successfully",
+		deleteError: "Error deleting user",
+		fetchError: "Error loading users",
 	},
 };
 
@@ -130,7 +160,7 @@ const es = {
 		loading: "Cargando...",
 		save: "Guardar",
 		cancel: "Cancelar",
-		delete: "Borrar", // Changed from Eliminar
+		delete: "Borrar",
 		edit: "Editar",
 		total: "Total",
 		actions: "Acciones",
@@ -143,25 +173,32 @@ const es = {
 		item: "Artículo",
 		search: "Buscar",
 		filters: "Filtros",
-		all: "Todo", // Changed from Todos
+		all: "Todo",
 		product: "Producto",
-		each: "cada uno",
+		each: "c/u",
 		create: "Crear",
 		update: "Actualizar",
 		appName: "Laundry Helper",
 		yes: "Sí",
 		no: "No",
+		view: "Ver",
+		admin: "Administrador",
+		member: "Miembro",
+		by: "por",
+		createdBy: "Creado por",
+		email: "Correo",
+		username: "Usuario",
 	},
 	categories: {
-		"Mattress Pads": "Protectores de Colchón",
-		Blankets: "Cobijas", // Changed from Mantas
-		"Duvet Covers": "Fundas de Edredón", // Changed from Fundas Nórdicas
+		"Mattress Pads": "Cubre Colchones",
+		Blankets: "Cobijas",
+		"Duvet Covers": "Fundas de Edredón",
 		Comforters: "Edredones",
-		"Pillow Shams": "Fundas Decorativas", // Changed from Fundas de Almohada
-		"Bed Skirts": "Volantes de Cama", // Changed from Faldones de Cama
+		"Pillow Shams": "Fundas Decorativas",
+		"Bed Skirts": "Faldones de Cama",
 		Bathroom: "Baño",
 		Kitchen: "Cocina",
-		Rugs: "Tapetes", // Changed from Alfombras
+		Rugs: "Tapetes",
 		"Table Cloths": "Manteles",
 		Curtains: "Cortinas",
 		Protectors: "Protectores",
@@ -169,26 +206,34 @@ const es = {
 		Services: "Servicios",
 	},
 	navigation: {
-		dashboard: "Tablero", // Changed from Panel
+		dashboard: "Panel",
 		orders: "Pedidos",
 		products: "Productos",
 		createOrder: "Crear Pedido",
 		language: "Idioma",
+		users: "Usuarios",
 	},
 	auth: {
 		username: "Usuario",
 		password: "Contraseña",
-		loginTitle: "Inicia sesión en tu cuenta", // More informal, Mexican style
-		registerTitle: "Crea tu cuenta", // More informal, Mexican style
-		loginError: "Datos incorrectos", // Changed from Credenciales inválidas
-		registerError: "Error al registrarse", // Changed from Error en el registro
+		email: "Correo",
+		loginTitle: "Inicia sesión en tu cuenta",
+		registerTitle: "Crea tu cuenta",
+		loginError: "Datos incorrectos",
+		registerError: "No se pudo crear la cuenta",
+		noAccount: "¿No tienes cuenta?",
+		registerNow: "Regístrate aquí",
+		haveAccount: "¿Ya tienes cuenta?",
+		loginHere: "Inicia sesión aquí",
+		loginPlaceholder: "Correo o usuario",
 	},
 	dashboard: {
-		title: "Tablero", // Changed from Panel
+		title: "Panel",
 		totalOrders: "Total de Pedidos",
 		totalRevenue: "Ingresos Totales",
-		averageOrderValue: "Valor Promedio por Pedido", // Changed wording
+		averageOrderValue: "Promedio por Pedido",
 		recentOrders: "Pedidos Recientes",
+		totalUsers: "Total de Usuarios",
 	},
 	orders: {
 		title: "Pedidos",
@@ -202,7 +247,7 @@ const es = {
 		status: "Estado",
 		export: "Exportar",
 		view: "Ver",
-		createdBy: "Creado Por", // Added here
+		createdBy: "Creado por",
 		availableProducts: "Productos Disponibles",
 		searchProducts: "Buscar productos...",
 		noItems: "Sin artículos",
@@ -221,15 +266,40 @@ const es = {
 		endDate: "Fecha Final",
 		filterOrders: "Filtrar Pedidos",
 		confirmCancel:
-			"¿Estás seguro de que quieres cancelar este pedido? Se perderán todos los artículos.",
-		errorSaving: "Error al guardar el pedido. Por favor, inténtalo de nuevo.",
+			"¿Seguro que quieres cancelar? Se perderán todos los artículos",
+		errorSaving: "Error al guardar el pedido. Inténtalo de nuevo",
+		saving: "Guardando...",
+		fetchError: "Error al cargar los pedidos",
+		exportError: "Error al exportar el pedido",
+		deleteError: "Error al borrar el pedido",
+		deleteSuccess: "Pedido borrado con éxito",
 	},
 	products: {
 		title: "Productos",
 		addProduct: "Agregar Producto",
 		editProduct: "Editar Producto",
 		spanishName: "Nombre en Español",
-		confirmDelete: "¿Seguro que quieres borrar este producto?", // More informal, Mexican style
+		confirmDelete: "¿Seguro que quieres borrar este producto?",
+		selectCategory: "Selecciona una categoría",
+		fetchError: "Error al cargar los productos",
+		createSuccess: "Producto creado con éxito",
+		updateSuccess: "Producto actualizado con éxito",
+		deleteSuccess: "Producto borrado con éxito",
+		deleteError: "Error al borrar el producto",
+		saveError: "Error al guardar el producto",
+	},
+	users: {
+		title: "Usuarios",
+		addUser: "Agregar Usuario",
+		username: "Usuario",
+		email: "Correo",
+		createdAt: "Fecha de Creación",
+		confirmDelete: "¿Seguro que quieres borrar este usuario?",
+		createSuccess: "Usuario creado con éxito",
+		createError: "Error al crear el usuario",
+		deleteSuccess: "Usuario borrado con éxito",
+		deleteError: "Error al borrar el usuario",
+		fetchError: "Error al cargar los usuarios",
 	},
 };
 

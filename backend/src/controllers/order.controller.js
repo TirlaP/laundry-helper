@@ -55,6 +55,9 @@ export const createOrder = async (req, res) => {
 export const getOrders = async (req, res) => {
 	try {
 		const query = {};
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;
+		const skip = (page - 1) * limit;
 
 		// Only filter by user if viewAll is not true
 		if (req.query.viewAll !== "true") {
@@ -75,12 +78,26 @@ export const getOrders = async (req, res) => {
 			};
 		}
 
+		// Get total count for pagination
+		const total = await Order.countDocuments(query);
+
+		// Get paginated orders
 		const orders = await Order.find(query)
 			.populate("items.product")
 			.populate("user", "displayName")
-			.sort({ createdAt: -1 });
+			.sort({ createdAt: -1 })
+			.skip(skip)
+			.limit(limit);
 
-		res.status(200).json(orders);
+		res.status(200).json({
+			orders,
+			pagination: {
+				total,
+				page,
+				pages: Math.ceil(total / limit),
+				hasMore: skip + orders.length < total,
+			},
+		});
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}
@@ -111,7 +128,7 @@ export const getOrderById = async (req, res) => {
 			user: req.user.id,
 		})
 			.populate("items.product")
-			.populate("user", "displayName"); // Add this to get user info
+			.populate("user", "displayName");
 
 		if (!order) {
 			return res.status(404).json({ message: "Order not found" });

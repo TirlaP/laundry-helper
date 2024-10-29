@@ -1,16 +1,20 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Edit2, Plus, Trash2, X } from "lucide-react";
+import { Edit2, Loader2, Plus, Trash2, X } from "lucide-react";
 import { Fragment, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import Button from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
+import { useAuth } from "../contexts/AuthContext";
 import apiClient from "../utils/apiClient";
 
 const Products = () => {
 	const { t, i18n } = useTranslation();
+	const { user } = useAuth();
+	const isAdmin = user?.role === "admin";
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
 	const [formData, setFormData] = useState({
 		name: "",
@@ -24,11 +28,13 @@ const Products = () => {
 
 	const fetchProducts = async () => {
 		try {
+			setLoading(true);
 			const { data } = await apiClient.get("/products");
 			setProducts(data);
-			setLoading(false);
 		} catch (error) {
 			console.error("Error fetching products:", error);
+			toast.error(t("products.fetchError"));
+		} finally {
 			setLoading(false);
 		}
 	};
@@ -38,6 +44,8 @@ const Products = () => {
 	}, []);
 
 	const handleOpenModal = (product = null) => {
+		if (!isAdmin) return;
+
 		if (product) {
 			setEditingProduct(product);
 			setFormData({
@@ -60,26 +68,38 @@ const Products = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		if (!isAdmin) return;
+
+		setIsSubmitting(true);
 		try {
 			if (editingProduct) {
 				await apiClient.put(`/products/${editingProduct._id}`, formData);
+				toast.success(t("products.updateSuccess"));
 			} else {
 				await apiClient.post("/products", formData);
+				toast.success(t("products.createSuccess"));
 			}
 			setIsModalOpen(false);
 			fetchProducts();
 		} catch (error) {
 			console.error("Error saving product:", error);
+			toast.error(error.response?.data?.message || t("products.saveError"));
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
 	const handleDelete = async (id) => {
+		if (!isAdmin) return;
+
 		if (window.confirm(t("products.confirmDelete"))) {
 			try {
 				await apiClient.delete(`/products/${id}`);
+				toast.success(t("products.deleteSuccess"));
 				fetchProducts();
 			} catch (error) {
 				console.error("Error deleting product:", error);
+				toast.error(t("products.deleteError"));
 			}
 		}
 	};
@@ -87,7 +107,10 @@ const Products = () => {
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center h-full">
-				<div className="text-lg">{t("common.loading")}</div>
+				<div className="flex items-center">
+					<Loader2 className="w-6 h-6 animate-spin mr-2" />
+					<div className="text-lg">{t("common.loading")}</div>
+				</div>
 			</div>
 		);
 	}
@@ -96,16 +119,21 @@ const Products = () => {
 		<div className="space-y-6">
 			<div className="flex justify-between items-center">
 				<h1 className="text-2xl font-bold">{t("products.title")}</h1>
-				<Button onClick={() => handleOpenModal()}>
-					<Plus className="w-4 h-4 mr-2" />
-					{t("products.addProduct")}
-				</Button>
+				{isAdmin && (
+					<button
+						onClick={() => handleOpenModal()}
+						className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+					>
+						<Plus className="w-4 h-4 mr-2" />
+						{t("products.addProduct")}
+					</button>
+				)}
 			</div>
 
 			<Card className="p-6">
-				<div className="max-h-[70vh] overflow-y-auto">
+				<div className="overflow-x-auto">
 					<table className="w-full">
-						<thead className="sticky top-0 bg-white">
+						<thead>
 							<tr className="text-left border-b">
 								<th className="pb-3 font-semibold">{t("common.name")}</th>
 								<th className="pb-3 font-semibold">
@@ -115,9 +143,11 @@ const Products = () => {
 								<th className="pb-3 font-semibold text-right">
 									{t("common.price")}
 								</th>
-								<th className="pb-3 font-semibold text-right">
-									{t("common.actions")}
-								</th>
+								{isAdmin && (
+									<th className="pb-3 font-semibold text-right">
+										{t("common.actions")}
+									</th>
+								)}
 							</tr>
 						</thead>
 						<tbody>
@@ -131,24 +161,26 @@ const Products = () => {
 									<td className="py-3 text-right">
 										${product.price.toFixed(2)}
 									</td>
-									<td className="py-3 text-right">
-										<div className="flex justify-end space-x-2">
-											<button
-												onClick={() => handleOpenModal(product)}
-												className="text-blue-600 hover:text-blue-700"
-												title={t("common.edit")}
-											>
-												<Edit2 className="w-4 h-4" />
-											</button>
-											<button
-												onClick={() => handleDelete(product._id)}
-												className="text-red-600 hover:text-red-700"
-												title={t("common.delete")}
-											>
-												<Trash2 className="w-4 h-4" />
-											</button>
-										</div>
-									</td>
+									{isAdmin && (
+										<td className="py-3 text-right">
+											<div className="flex justify-end space-x-2">
+												<button
+													onClick={() => handleOpenModal(product)}
+													className="text-blue-600 hover:text-blue-700"
+													title={t("common.edit")}
+												>
+													<Edit2 className="w-4 h-4" />
+												</button>
+												<button
+													onClick={() => handleDelete(product._id)}
+													className="text-red-600 hover:text-red-700"
+													title={t("common.delete")}
+												>
+													<Trash2 className="w-4 h-4" />
+												</button>
+											</div>
+										</td>
+									)}
 								</tr>
 							))}
 						</tbody>
@@ -160,7 +192,7 @@ const Products = () => {
 				<Dialog
 					as="div"
 					className="relative z-50"
-					onClose={() => setIsModalOpen(false)}
+					onClose={() => !isSubmitting && setIsModalOpen(false)}
 				>
 					<Transition.Child
 						as={Fragment}
@@ -196,8 +228,9 @@ const Products = () => {
 												: t("products.addProduct")}
 										</Dialog.Title>
 										<button
-											onClick={() => setIsModalOpen(false)}
-											className="text-gray-400 hover:text-gray-500"
+											onClick={() => !isSubmitting && setIsModalOpen(false)}
+											className="text-gray-400 hover:text-gray-500 disabled:opacity-50"
+											disabled={isSubmitting}
 										>
 											<X className="w-5 h-5" />
 										</button>
@@ -214,8 +247,9 @@ const Products = () => {
 												onChange={(e) =>
 													setFormData({ ...formData, name: e.target.value })
 												}
-												className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+												className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:bg-gray-100"
 												required
+												disabled={isSubmitting}
 											/>
 										</div>
 
@@ -229,8 +263,9 @@ const Products = () => {
 												onChange={(e) =>
 													setFormData({ ...formData, nameEs: e.target.value })
 												}
-												className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+												className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:bg-gray-100"
 												required
+												disabled={isSubmitting}
 											/>
 										</div>
 
@@ -243,8 +278,9 @@ const Products = () => {
 												onChange={(e) =>
 													setFormData({ ...formData, category: e.target.value })
 												}
-												className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+												className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:bg-gray-100"
 												required
+												disabled={isSubmitting}
 											>
 												<option value="">{t("products.selectCategory")}</option>
 												{categories.map((category) => (
@@ -270,8 +306,9 @@ const Products = () => {
 													onChange={(e) =>
 														setFormData({ ...formData, price: e.target.value })
 													}
-													className="block w-full rounded-lg border border-gray-300 pl-7 pr-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+													className="block w-full rounded-lg border border-gray-300 pl-7 pr-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:bg-gray-100"
 													required
+													disabled={isSubmitting}
 												/>
 											</div>
 										</div>
@@ -280,14 +317,19 @@ const Products = () => {
 											<button
 												type="button"
 												onClick={() => setIsModalOpen(false)}
-												className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+												className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50"
+												disabled={isSubmitting}
 											>
 												{t("common.cancel")}
 											</button>
 											<button
 												type="submit"
-												className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+												className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 flex items-center"
+												disabled={isSubmitting}
 											>
+												{isSubmitting && (
+													<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+												)}
 												{editingProduct ? t("common.save") : t("common.create")}
 											</button>
 										</div>

@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
@@ -11,15 +12,18 @@ const Register = () => {
 		password: "",
 	});
 	const [error, setError] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
 	const { register } = useAuth();
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		if (isLoading) return;
+
 		setError("");
+		setIsLoading(true);
 
 		try {
-			// Pass all three parameters in the correct order
 			await register(
 				formData.email.trim(),
 				formData.username.trim(),
@@ -29,6 +33,8 @@ const Register = () => {
 		} catch (err) {
 			console.error("Registration error details:", err.response?.data);
 			setError(err.response?.data?.message || t("auth.registerError"));
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -67,6 +73,7 @@ const Register = () => {
 								onChange={(e) =>
 									setFormData({ ...formData, email: e.target.value })
 								}
+								disabled={isLoading}
 							/>
 						</div>
 						<div>
@@ -80,6 +87,7 @@ const Register = () => {
 								onChange={(e) =>
 									setFormData({ ...formData, username: e.target.value })
 								}
+								disabled={isLoading}
 							/>
 						</div>
 						<div>
@@ -93,6 +101,7 @@ const Register = () => {
 								onChange={(e) =>
 									setFormData({ ...formData, password: e.target.value })
 								}
+								disabled={isLoading}
 							/>
 						</div>
 					</div>
@@ -100,9 +109,13 @@ const Register = () => {
 					<div>
 						<button
 							type="submit"
-							className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+							disabled={isLoading}
+							className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							{t("common.register")}
+							{isLoading ? (
+								<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+							) : null}
+							{isLoading ? t("common.loading") : t("common.register")}
 						</button>
 					</div>
 				</form>

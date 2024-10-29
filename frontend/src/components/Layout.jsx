@@ -8,6 +8,7 @@ import {
 	Menu,
 	Package,
 	Plus,
+	Users,
 	X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -16,7 +17,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 const Layout = () => {
-	const { logout } = useAuth();
+	const { logout, user } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { t, i18n } = useTranslation();
@@ -35,9 +36,7 @@ const Layout = () => {
 			}
 		};
 
-		// Initial check
 		handleResize();
-
 		window.addEventListener("resize", handleResize);
 		return () => window.removeEventListener("resize", handleResize);
 	}, []);
@@ -48,17 +47,29 @@ const Layout = () => {
 		localStorage.setItem("language", newLang);
 	};
 
-	const navigation = [
-		{ name: t("navigation.dashboard"), href: "/", icon: Home },
-		{ name: t("navigation.orders"), href: "/orders", icon: FileText },
-		{ name: t("navigation.products"), href: "/products", icon: Package },
-		{ name: t("navigation.createOrder"), href: "/orders/create", icon: Plus },
-	];
+	// Define navigation items with role-based access
+	const getNavigationItems = () => {
+		const items = [
+			{ name: t("navigation.dashboard"), href: "/", icon: Home },
+			{ name: t("navigation.orders"), href: "/orders", icon: FileText },
+			{ name: t("navigation.products"), href: "/products", icon: Package },
+			{ name: t("navigation.createOrder"), href: "/orders/create", icon: Plus },
+		];
+
+		// Add Users page for admin users
+		if (user?.role === "admin") {
+			items.push({ name: t("navigation.users"), href: "/users", icon: Users });
+		}
+
+		return items;
+	};
 
 	const handleLogout = () => {
 		logout();
 		navigate("/login");
 	};
+
+	const navigation = getNavigationItems();
 
 	const Sidebar = ({ isMobile = false }) => (
 		<div className="flex flex-col h-full bg-white">
@@ -75,6 +86,11 @@ const Layout = () => {
 				>
 					{t("common.appName")}
 				</h1>
+				{!isCollapsed && !isMobile && (
+					<span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+						{user?.role === "admin" ? t("common.admin") : t("common.member")}
+					</span>
+				)}
 			</div>
 
 			{/* Collapse Button */}
@@ -172,14 +188,17 @@ const Layout = () => {
 		<div className="min-h-screen bg-gray-100">
 			{/* Mobile Header */}
 			<div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b px-4 py-2">
-				<div className="flex items-center">
+				<div className="flex items-center justify-between">
 					<button
 						onClick={() => setIsMobileMenuOpen(true)}
 						className="p-2 rounded-md text-gray-400 hover:text-gray-500"
 					>
 						<Menu className="h-6 w-6" />
 					</button>
-					<div className="ml-4 font-semibold">{t("common.appName")}</div>
+					<div className="font-semibold">{t("common.appName")}</div>
+					<div className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+						{user?.role === "admin" ? t("common.admin") : t("common.member")}
+					</div>
 				</div>
 			</div>
 
