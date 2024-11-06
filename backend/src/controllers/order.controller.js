@@ -59,9 +59,10 @@ export const getOrders = async (req, res) => {
 		const limit = parseInt(req.query.limit) || 10;
 		const skip = (page - 1) * limit;
 
-		// Only filter by user if viewAll is not true
-		if (req.query.viewAll !== "true") {
-			query.user = req.user.id;
+		// Remove the user restriction - allow viewing all orders
+		// Optional: Add user filter if specifically requested
+		if (req.query.userId) {
+			query.user = req.query.userId;
 		}
 
 		// Add date filters if provided
@@ -84,7 +85,7 @@ export const getOrders = async (req, res) => {
 		// Get paginated orders
 		const orders = await Order.find(query)
 			.populate("items.product")
-			.populate("user", "displayName")
+			.populate("user", "displayName username email")
 			.sort({ createdAt: -1 })
 			.skip(skip)
 			.limit(limit);
@@ -123,12 +124,10 @@ export const updateOrder = async (req, res) => {
 
 export const getOrderById = async (req, res) => {
 	try {
-		const order = await Order.findOne({
-			_id: req.params.id,
-			user: req.user.id,
-		})
+		// Remove the user restriction from the query
+		const order = await Order.findById(req.params.id)
 			.populate("items.product")
-			.populate("user", "displayName");
+			.populate("user", "displayName username email");
 
 		if (!order) {
 			return res.status(404).json({ message: "Order not found" });
@@ -159,10 +158,7 @@ export const deleteOrder = async (req, res) => {
 
 export const exportOrder = async (req, res) => {
 	try {
-		const order = await Order.findOne({
-			_id: req.params.id,
-			user: req.user.id,
-		})
+		const order = await Order.findById(req.params.id)
 			.populate("items.product")
 			.populate("user", "displayName");
 
@@ -274,3 +270,4 @@ export const exportOrder = async (req, res) => {
 		res.status(500).json({ message: error.message });
 	}
 };
+
