@@ -107,17 +107,52 @@ export const getOrders = async (req, res) => {
 export const updateOrder = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const order = await Order.findOneAndUpdate(
-			{ _id: id, user: req.user.id },
-			req.body,
-			{ new: true }
-		).populate("items.product");
+		const { items, name } = req.body;
+
+		// Transform and verify items, similar to create
+		const transformedItems = await Promise.all(
+			items.map(async (item) => {
+				const product = await Product.findById(item.product);
+				if (!product) {
+					throw new Error(`Product not found with id: ${item.product}`);
+				}
+
+				return {
+					product: product._id,
+					name: product.name,
+					quantity: item.quantity,
+					price: product.price,
+				};
+			})
+		);
+
+		// Recalculate total
+		const total = transformedItems.reduce(
+			(sum, item) => sum + item.price * item.quantity,
+			0
+		);
+
+		// Update the order with the new data
+		const updatedOrder = {
+			name: name || undefined,
+			items: transformedItems,
+			total,
+			lastModifiedBy: req.user.username || req.user.email || "Anonymous",
+			lastModifiedAt: new Date(),
+		};
+
+		// Find and update the order
+		const order = await Order.findByIdAndUpdate(id, updatedOrder, { new: true })
+			.populate("items.product")
+			.populate("user", "displayName username email");
 
 		if (!order) {
 			return res.status(404).json({ message: "Order not found" });
 		}
+
 		res.status(200).json(order);
 	} catch (error) {
+		console.error("Update error:", error);
 		res.status(500).json({ message: error.message });
 	}
 };
