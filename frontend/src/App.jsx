@@ -1,4 +1,5 @@
 import { Toaster } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import {
 	Navigate,
 	Route,
@@ -19,9 +20,17 @@ import Users from "./pages/Users";
 
 const PrivateRoute = ({ children, requireAdmin = false }) => {
 	const { user, loading } = useAuth();
+	const { t } = useTranslation();
 
 	if (loading) {
-		return <div>Loading...</div>;
+		return (
+			<div className="flex items-center justify-center h-full">
+				<div className="text-lg flex items-center">
+					<div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+					{t("common.loading")}
+				</div>
+			</div>
+		);
 	}
 
 	if (!user) {
@@ -53,9 +62,23 @@ const App = () => {
 						<Route index element={<Dashboard />} />
 						<Route path="orders" element={<Orders />} />
 						<Route path="/orders/:id" element={<OrderDetails />} />
-						<Route path="/orders/:id/edit" element={<EditOrder />} />
+						<Route
+							path="/orders/:id/edit"
+							element={
+								<PrivateRoute>
+									<EditOrder />
+								</PrivateRoute>
+							}
+						/>
 						<Route path="products" element={<Products />} />
-						<Route path="orders/create" element={<CreateOrder />} />
+						<Route
+							path="orders/create"
+							element={
+								<PrivateRoute>
+									<CreateOrder />
+								</PrivateRoute>
+							}
+						/>
 						<Route
 							path="users"
 							element={
@@ -72,3 +95,4 @@ const App = () => {
 };
 
 export default App;
+

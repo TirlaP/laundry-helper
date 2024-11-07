@@ -37,6 +37,8 @@ const en = {
 		admin: "Admin",
 		member: "Member",
 		by: "by",
+		remove: "Remove",
+		back: "Back",
 	},
 	categories: {
 		"Mattress Pads": "Mattress Pads",
@@ -122,6 +124,14 @@ const en = {
 		exportError: "Error exporting order",
 		deleteError: "Error deleting order",
 		deleteSuccess: "Order deleted successfully",
+		editOrder: "Edit Order",
+		addItem: "Add Item",
+		errorUpdatingOrder: "Error updating order",
+		total: "Total",
+		orderUpdated: "Order updated successfully",
+		clickToExpand: "Click to view details",
+		clickToMinimize: "Click to minimize",
+		clickOutsideToClose: "Click outside to close",
 	},
 	products: {
 		title: "Products",
@@ -188,6 +198,8 @@ const es = {
 		createdBy: "Creado por",
 		email: "Correo",
 		username: "Usuario",
+		remove: "Eliminar",
+		back: "Volver",
 	},
 	categories: {
 		"Mattress Pads": "Cubre Colchones",
@@ -273,6 +285,14 @@ const es = {
 		exportError: "Error al exportar el pedido",
 		deleteError: "Error al borrar el pedido",
 		deleteSuccess: "Pedido borrado con éxito",
+		editOrder: "Editar Pedido",
+		addItem: "Agregar Artículo",
+		errorUpdatingOrder: "Error al actualizar el pedido",
+		total: "Total",
+		orderUpdated: "Pedido actualizado exitosamente",
+		clickToExpand: "Clic para ver detalles",
+		clickToMinimize: "Clic para minimizar",
+		clickOutsideToClose: "Clic fuera para cerrar",
 	},
 	products: {
 		title: "Productos",
@@ -319,3 +339,4 @@ i18n.use(initReactI18next).init({
 });
 
 export default i18n;
+

@@ -245,8 +245,10 @@ const Orders = () => {
 	if (loading && page === 1) {
 		return (
 			<div className="flex items-center justify-center h-full">
-				<Loader2 className="w-6 h-6 animate-spin mr-2" />
-				<div className="text-lg">{t("common.loading")}</div>
+				<div className="text-lg flex items-center">
+					<div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+					{t("common.loading")}
+				</div>
 			</div>
 		);
 	}
@@ -374,3 +376,4 @@ const Orders = () => {
 };
 
 export default Orders;
+

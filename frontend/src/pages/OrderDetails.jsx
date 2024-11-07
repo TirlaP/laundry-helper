@@ -58,7 +58,16 @@ const OrderDetails = () => {
 		}
 	};
 
-	if (loading) return <div className="p-4">{t("common.loading")}</div>;
+	if (loading) {
+		return (
+			<div className="flex items-center justify-center h-full">
+				<div className="text-lg flex items-center">
+					<div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+					{t("common.loading")}
+				</div>
+			</div>
+		);
+	}
 	if (error) return <div className="p-4 text-red-500">{error}</div>;
 	if (!order) return <div className="p-4">{t("orders.notFound")}</div>;
 
@@ -186,3 +195,4 @@ const OrderDetails = () => {
 };
 
 export default OrderDetails;
+
