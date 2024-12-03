@@ -1,7 +1,12 @@
+// controllers/order.controller.js
+
 import ExcelJS from "exceljs";
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
 
+/**
+ * Create a new order.
+ */
 export const createOrder = async (req, res) => {
 	try {
 		const { items, name } = req.body;
@@ -52,6 +57,10 @@ export const createOrder = async (req, res) => {
 	}
 };
 
+/**
+ * Retrieve orders with optional filters and pagination.
+ * All authenticated users can view all orders.
+ */
 export const getOrders = async (req, res) => {
 	try {
 		const query = {};
@@ -59,8 +68,7 @@ export const getOrders = async (req, res) => {
 		const limit = parseInt(req.query.limit) || 10;
 		const skip = (page - 1) * limit;
 
-		// Remove the user restriction - allow viewing all orders
-		// Optional: Add user filter if specifically requested
+		// Optional: Filter by specific user if provided
 		if (req.query.userId) {
 			query.user = req.query.userId;
 		}
@@ -100,14 +108,33 @@ export const getOrders = async (req, res) => {
 			},
 		});
 	} catch (error) {
+		console.error("Error fetching orders:", error);
 		res.status(500).json({ message: error.message });
 	}
 };
 
+/**
+ * Update an existing order.
+ * - Admins can update any order.
+ * - Regular members can only update their own orders.
+ */
 export const updateOrder = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { items, name } = req.body;
+
+		// Find the order first
+		const order = await Order.findById(id);
+		if (!order) {
+			return res.status(404).json({ message: "Order not found" });
+		}
+
+		// Authorization Check: Admins can edit any order; members can edit only their own
+		if (req.user.role !== "admin" && order.user.toString() !== req.user.id) {
+			return res
+				.status(403)
+				.json({ message: "Forbidden: You cannot edit this order" });
+		}
 
 		// Transform and verify items, similar to create
 		const transformedItems = await Promise.all(
@@ -133,7 +160,7 @@ export const updateOrder = async (req, res) => {
 		);
 
 		// Update the order with the new data
-		const updatedOrder = {
+		const updatedOrderData = {
 			name: name || undefined,
 			items: transformedItems,
 			total,
@@ -142,25 +169,29 @@ export const updateOrder = async (req, res) => {
 		};
 
 		// Find and update the order
-		const order = await Order.findByIdAndUpdate(id, updatedOrder, { new: true })
+		const updatedOrder = await Order.findByIdAndUpdate(id, updatedOrderData, {
+			new: true,
+		})
 			.populate("items.product")
 			.populate("user", "displayName username email");
 
-		if (!order) {
-			return res.status(404).json({ message: "Order not found" });
-		}
-
-		res.status(200).json(order);
+		res.status(200).json(updatedOrder);
 	} catch (error) {
 		console.error("Update error:", error);
 		res.status(500).json({ message: error.message });
 	}
 };
 
+/**
+ * Retrieve a single order by ID.
+ * All authenticated users can view any order.
+ */
 export const getOrderById = async (req, res) => {
 	try {
-		// Remove the user restriction from the query
-		const order = await Order.findById(req.params.id)
+		const { id } = req.params;
+
+		// Find the order
+		const order = await Order.findById(id)
 			.populate("items.product")
 			.populate("user", "displayName username email");
 
@@ -174,16 +205,30 @@ export const getOrderById = async (req, res) => {
 	}
 };
 
+/**
+ * Delete an existing order.
+ * - Admins can delete any order.
+ * - Regular members can only delete their own orders.
+ */
 export const deleteOrder = async (req, res) => {
 	try {
-		const order = await Order.findOneAndDelete({
-			_id: req.params.id,
-			user: req.user.id,
-		});
+		const { id } = req.params;
 
+		// Find the order first
+		const order = await Order.findById(id);
 		if (!order) {
 			return res.status(404).json({ message: "Order not found" });
 		}
+
+		// Authorization Check: Admins can delete any order; members can delete only their own
+		if (req.user.role !== "admin" && order.user.toString() !== req.user.id) {
+			return res
+				.status(403)
+				.json({ message: "Forbidden: You cannot delete this order" });
+		}
+
+		// Delete the order
+		await Order.findByIdAndDelete(id);
 
 		res.status(200).json({ message: "Order deleted successfully" });
 	} catch (error) {
@@ -191,14 +236,32 @@ export const deleteOrder = async (req, res) => {
 	}
 };
 
+/**
+ * Export an order to Excel.
+ * - Admins can export any order.
+ * - Regular members can only export their own orders.
+ */
 export const exportOrder = async (req, res) => {
 	try {
-		const order = await Order.findById(req.params.id)
+		const { id } = req.params;
+
+		// Find the order
+		const order = await Order.findById(id)
 			.populate("items.product")
-			.populate("user", "displayName");
+			.populate("user", "displayName username email");
 
 		if (!order) {
 			return res.status(404).json({ message: "Order not found" });
+		}
+
+		// Authorization Check: Admins can export any order; members can export only their own
+		if (
+			req.user.role !== "admin" &&
+			order.user._id.toString() !== req.user.id
+		) {
+			return res
+				.status(403)
+				.json({ message: "Forbidden: You cannot export this order" });
 		}
 
 		// Group items by category
