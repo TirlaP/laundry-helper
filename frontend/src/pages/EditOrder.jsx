@@ -1,3 +1,4 @@
+// src/pages/EditOrder.js
 import { ArrowLeft, Filter, Minus, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -10,8 +11,8 @@ import { useAuth } from "../contexts/AuthContext";
 import apiClient from "../utils/apiClient";
 
 const EditOrder = () => {
-	const { user } = useAuth();
 	const { t, i18n } = useTranslation();
+	const { user } = useAuth();
 	const navigate = useNavigate();
 	const { id } = useParams();
 
@@ -26,6 +27,7 @@ const EditOrder = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
 	const [showFilters, setShowFilters] = useState(false);
+	const [error, setError] = useState(null);
 
 	// Fetch order and products data
 	useEffect(() => {
@@ -37,6 +39,14 @@ const EditOrder = () => {
 				]);
 
 				const orderData = orderResponse.data;
+
+				// Authorization Check: Only admin or owner can edit
+				if (user.role !== "admin" && orderData.user._id !== user.id) {
+					toast.error(t("orders.notAuthorized"));
+					navigate("/orders");
+					return;
+				}
+
 				setOrderName(orderData.name || "");
 				setCurrentOrder({
 					items: orderData.items.map((item) => ({
@@ -52,14 +62,14 @@ const EditOrder = () => {
 				setProducts(productsResponse.data);
 			} catch (error) {
 				console.error("Error fetching data:", error);
-				toast.error(t("orders.errorLoadingOrder"));
+				setError(t("orders.errorLoadingOrder"));
 			} finally {
 				setLoading(false);
 			}
 		};
 
 		fetchData();
-	}, [id, i18n.language, t]);
+	}, [id, i18n.language, t, user.role, user.id, navigate]);
 
 	const organizedProducts = useMemo(() => {
 		const organized = {};
@@ -194,6 +204,8 @@ const EditOrder = () => {
 			</div>
 		);
 	}
+	if (error) return <div className="p-4 text-red-500">{error}</div>;
+	if (!currentOrder) return <div className="p-4">{t("orders.notFound")}</div>;
 
 	return (
 		<div className="h-full max-w-[1800px] mx-auto px-4 md:px-6 pb-24 lg:pb-6">

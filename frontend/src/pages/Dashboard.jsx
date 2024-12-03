@@ -1,3 +1,5 @@
+// src/pages/Dashboard.js
+
 import { format } from "date-fns";
 import {
 	DollarSign,
@@ -9,62 +11,84 @@ import {
 	Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/ui/Card";
 import { useAuth } from "../contexts/AuthContext";
 import apiClient from "../utils/apiClient";
 
-// Mobile Order Card Component
-const OrderCard = ({ order, onExport, onDelete, navigate, t, user }) => (
-	<Card className="mb-4 p-4">
-		<div className="space-y-2">
-			<div className="flex justify-between items-start">
-				<div>
-					<div className="space-y-1">
-						<p className="text-sm text-gray-600">#{order.orderNumber}</p>
-						<h3 className="font-semibold">{order.name || "-"}</h3>
-					</div>
-					<p className="text-sm text-gray-500 mt-1">
-						{format(new Date(order.createdAt), "MMM dd, yyyy")}
-					</p>
-					<p className="text-sm text-gray-600 mt-1">
-						{t("common.by")} {order.createdBy}
-					</p>
-				</div>
-				<div className="text-right">
-					<div className="font-bold">${order.total.toFixed(2)}</div>
-					<div className="text-sm text-gray-500">
-						{order.items.length}{" "}
-						{order.items.length === 1 ? t("common.item") : t("common.items")}
-					</div>
-				</div>
-			</div>
+/**
+ * Mobile Order Card Component
+ * Now includes authorization checks for edit and delete buttons.
+ */
+const OrderCard = ({ order, onExport, onDelete, navigate, t, user }) => {
+	/**
+	 * Determine if the current user can delete the order.
+	 * Admins can delete any order; members can delete only their own.
+	 */
+	const canDelete = () => {
+		return user.role === "admin" || order.user._id === user.id;
+	};
 
-			<div className="flex justify-end space-x-2 pt-2">
-				<button
-					onClick={() => navigate(`/orders/${order._id}`)}
-					className="p-2 text-gray-600 hover:text-gray-900"
-					title={t("common.view")}
-				>
-					<Eye className="w-4 h-4" />
-				</button>
-				<button
-					onClick={() => onExport(order._id, order.orderNumber)}
-					className="p-2 text-green-600 hover:text-green-700"
-					title={t("orders.export")}
-				>
-					<Download className="w-4 h-4" />
-				</button>
-				<button
-					onClick={() => navigate(`/orders/${order._id}/edit`)}
-					className="p-2 text-blue-600 hover:text-blue-700"
-					title={t("common.edit")}
-				>
-					<Edit className="w-4 h-4" />
-				</button>
-				{order.user === order.user.id ||
-					(user.role === "admin" && (
+	/**
+	 * Determine if the current user can edit the order.
+	 * Admins can edit any order; members can edit only their own.
+	 */
+	const canEdit = () => {
+		return user.role === "admin" || order.user._id === user.id;
+	};
+
+	return (
+		<Card className="mb-4 p-4">
+			<div className="space-y-2">
+				<div className="flex justify-between items-start">
+					<div>
+						<div className="space-y-1">
+							<p className="text-sm text-gray-600">#{order.orderNumber}</p>
+							<h3 className="font-semibold">{order.name || "-"}</h3>
+						</div>
+						<p className="text-sm text-gray-500 mt-1">
+							{format(new Date(order.createdAt), "MMM dd, yyyy")}
+						</p>
+						<p className="text-sm text-gray-600 mt-1">
+							{t("common.by")} {order.createdBy}
+						</p>
+					</div>
+					<div className="text-right">
+						<div className="font-bold">${order.total.toFixed(2)}</div>
+						<div className="text-sm text-gray-500">
+							{order.items.length}{" "}
+							{order.items.length === 1 ? t("common.item") : t("common.items")}
+						</div>
+					</div>
+				</div>
+
+				<div className="flex justify-end space-x-2 pt-2">
+					<button
+						onClick={() => navigate(`/orders/${order._id}`)}
+						className="p-2 text-gray-600 hover:text-gray-900"
+						title={t("common.view")}
+					>
+						<Eye className="w-4 h-4" />
+					</button>
+					<button
+						onClick={() => onExport(order._id, order.orderNumber)}
+						className="p-2 text-green-600 hover:text-green-700"
+						title={t("orders.export")}
+					>
+						<Download className="w-4 h-4" />
+					</button>
+					{canEdit() && (
+						<button
+							onClick={() => navigate(`/orders/${order._id}/edit`)}
+							className="p-2 text-blue-600 hover:text-blue-700"
+							title={t("common.edit")}
+						>
+							<Edit className="w-4 h-4" />
+						</button>
+					)}
+					{canDelete() && (
 						<button
 							onClick={() => onDelete(order._id)}
 							className="p-2 text-red-600 hover:text-red-700"
@@ -72,12 +96,17 @@ const OrderCard = ({ order, onExport, onDelete, navigate, t, user }) => (
 						>
 							<Trash className="w-4 h-4" />
 						</button>
-					))}
+					)}
+				</div>
 			</div>
-		</div>
-	</Card>
-);
+		</Card>
+	);
+};
 
+/**
+ * Dashboard Component
+ * Now includes authorization checks for edit and delete buttons on recent orders.
+ */
 const Dashboard = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
@@ -92,6 +121,9 @@ const Dashboard = () => {
 	const [recentOrders, setRecentOrders] = useState([]);
 	const [loading, setLoading] = useState(true);
 
+	/**
+	 * Fetch dashboard statistics and recent orders.
+	 */
 	useEffect(() => {
 		const fetchDashboardData = async () => {
 			try {
@@ -109,13 +141,17 @@ const Dashboard = () => {
 				setLoading(false);
 			} catch (error) {
 				console.error("Error fetching dashboard data:", error);
+				toast.error(t("dashboard.fetchError"));
 				setLoading(false);
 			}
 		};
 
 		fetchDashboardData();
-	}, []);
+	}, [t]);
 
+	/**
+	 * Export an order as an Excel file.
+	 */
 	const handleExport = async (orderId, orderNumber) => {
 		try {
 			const response = await apiClient.get(`/orders/${orderId}/export`, {
@@ -131,9 +167,15 @@ const Dashboard = () => {
 			link.remove();
 		} catch (err) {
 			console.error("Error exporting order:", err);
+			toast.error(t("dashboard.exportError"));
 		}
 	};
 
+	/**
+	 * Delete an order after confirmation.
+	 * - Admins can delete any order.
+	 * - Members can delete only their own orders.
+	 */
 	const handleDelete = async (orderId) => {
 		if (window.confirm(t("orders.confirmDelete"))) {
 			try {
@@ -144,12 +186,17 @@ const Dashboard = () => {
 					...prev,
 					totalOrders: prev.totalOrders - 1,
 				}));
+				toast.success(t("orders.deleteSuccess"));
 			} catch (err) {
 				console.error("Error deleting order:", err);
+				toast.error(t("orders.deleteError"));
 			}
 		}
 	};
 
+	/**
+	 * Format currency values for display.
+	 */
 	const formatCurrency = (value) => {
 		if (value >= 1000000) {
 			return `$${(value / 1000000).toFixed(1)}M`;
@@ -160,6 +207,25 @@ const Dashboard = () => {
 		return `$${value.toFixed(2)}`;
 	};
 
+	/**
+	 * Determine if the current user can delete the order.
+	 * Admins can delete any order; members can delete only their own.
+	 */
+	const canDelete = (order) => {
+		return user.role === "admin" || order.user._id === user.id;
+	};
+
+	/**
+	 * Determine if the current user can edit the order.
+	 * Admins can edit any order; members can edit only their own.
+	 */
+	const canEdit = (order) => {
+		return user.role === "admin" || order.user._id === user.id;
+	};
+
+	/**
+	 * Render loading indicator.
+	 */
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -314,14 +380,18 @@ const Dashboard = () => {
 												>
 													<Download className="w-4 h-4" />
 												</button>
-												<button
-													onClick={() => navigate(`/orders/${order._id}/edit`)}
-													className="p-2 text-blue-600 hover:text-blue-700"
-													title={t("common.edit")}
-												>
-													<Edit className="w-4 h-4" />
-												</button>
-												{(order.user === user.id || user.role === "admin") && (
+												{canEdit(order) && (
+													<button
+														onClick={() =>
+															navigate(`/orders/${order._id}/edit`)
+														}
+														className="p-2 text-blue-600 hover:text-blue-700"
+														title={t("common.edit")}
+													>
+														<Edit className="w-4 h-4" />
+													</button>
+												)}
+												{canDelete(order) && (
 													<button
 														onClick={() => handleDelete(order._id)}
 														className="p-2 text-red-600 hover:text-red-700"
@@ -362,3 +432,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

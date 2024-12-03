@@ -1,3 +1,5 @@
+// src/pages/Orders.js
+
 import { format } from "date-fns";
 import { Download, Edit, Eye, Loader2, Plus, Trash } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -16,19 +18,24 @@ const Orders = () => {
 	const [page, setPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
 	const [filters, setFilters] = useState({
-		viewAll: true,
+		viewAll: user.role === "admin" ? true : false, // Initialize based on role
 		startDate: "",
 		endDate: "",
 	});
 	const loader = useRef(null);
 	const navigate = useNavigate();
 
+	/**
+	 * Fetch orders from the backend with pagination and filters.
+	 */
 	const fetchOrders = async (pageNum = 1, append = false) => {
 		try {
 			const params = new URLSearchParams();
 			params.append("page", pageNum);
 			params.append("limit", 10);
-			if (filters.viewAll) params.append("viewAll", "true");
+			// Only append viewAll if user is admin
+			if (user.role === "admin" && filters.viewAll)
+				params.append("viewAll", "true");
 			if (filters.startDate) params.append("startDate", filters.startDate);
 			if (filters.endDate) params.append("endDate", filters.endDate);
 
@@ -47,6 +54,9 @@ const Orders = () => {
 		}
 	};
 
+	/**
+	 * Intersection Observer callback to implement infinite scrolling.
+	 */
 	const handleObserver = useCallback(
 		(entries) => {
 			const target = entries[0];
@@ -57,6 +67,9 @@ const Orders = () => {
 		[hasMore, loading]
 	);
 
+	/**
+	 * Set up the Intersection Observer for infinite scrolling.
+	 */
 	useEffect(() => {
 		const option = {
 			root: null,
@@ -71,18 +84,27 @@ const Orders = () => {
 		};
 	}, [handleObserver]);
 
+	/**
+	 * Fetch orders when filters change.
+	 */
 	useEffect(() => {
 		setLoading(true);
 		setPage(1);
 		fetchOrders(1, false);
 	}, [filters]);
 
+	/**
+	 * Fetch more orders when page number increments.
+	 */
 	useEffect(() => {
 		if (page > 1) {
 			fetchOrders(page, true);
 		}
 	}, [page]);
 
+	/**
+	 * Export an order as an Excel file.
+	 */
 	const handleExport = async (order) => {
 		try {
 			const response = await apiClient.get(`/orders/${order._id}/export`, {
@@ -105,6 +127,9 @@ const Orders = () => {
 		}
 	};
 
+	/**
+	 * Delete an order after confirmation.
+	 */
 	const handleDelete = async (orderId) => {
 		if (window.confirm(t("orders.confirmDelete"))) {
 			try {
@@ -118,12 +143,25 @@ const Orders = () => {
 		}
 	};
 
-	// Can delete if admin or if it's user's own order
+	/**
+	 * Determine if the current user can delete the order.
+	 * Admins can delete any order; members can delete only their own.
+	 */
 	const canDelete = (order) => {
-		return user.role === "admin" || order.user === user.id;
+		return user.role === "admin" || order.user._id === user.id;
 	};
 
-	// Mobile Order Card Component
+	/**
+	 * Determine if the current user can edit the order.
+	 * Admins can edit any order; members can edit only their own.
+	 */
+	const canEdit = (order) => {
+		return user.role === "admin" || order.user._id === user.id;
+	};
+
+	/**
+	 * Mobile Order Card Component
+	 */
 	const OrderCard = ({ order }) => (
 		<Card className="mb-4 p-4">
 			<div className="space-y-2">
@@ -164,13 +202,15 @@ const Orders = () => {
 					>
 						<Download className="w-4 h-4" />
 					</button>
-					<button
-						onClick={() => navigate(`/orders/${order._id}/edit`)}
-						className="p-2 text-blue-600 hover:text-blue-700"
-						title={t("common.edit")}
-					>
-						<Edit className="w-4 h-4" />
-					</button>
+					{canEdit(order) && (
+						<button
+							onClick={() => navigate(`/orders/${order._id}/edit`)}
+							className="p-2 text-blue-600 hover:text-blue-700"
+							title={t("common.edit")}
+						>
+							<Edit className="w-4 h-4" />
+						</button>
+					)}
 					{canDelete(order) && (
 						<button
 							onClick={() => handleDelete(order._id)}
@@ -185,27 +225,32 @@ const Orders = () => {
 		</Card>
 	);
 
+	/**
+	 * Filters Section Component
+	 */
 	const FiltersSection = () => (
 		<Card className="p-4 mb-4">
 			<div className="flex flex-col md:flex-row gap-4 items-end">
-				<div className="flex-1">
-					<label className="block text-sm font-medium text-gray-700 mb-1">
-						{t("orders.viewOption")}
-					</label>
-					<select
-						className="w-full border rounded-md p-2"
-						value={filters.viewAll ? "all" : "mine"}
-						onChange={(e) =>
-							setFilters((prev) => ({
-								...prev,
-								viewAll: e.target.value === "all",
-							}))
-						}
-					>
-						<option value="mine">{t("orders.myOrders")}</option>
-						<option value="all">{t("orders.allOrders")}</option>
-					</select>
-				</div>
+				{user.role === "admin" && (
+					<div className="flex-1">
+						<label className="block text-sm font-medium text-gray-700 mb-1">
+							{t("orders.viewOption")}
+						</label>
+						<select
+							className="w-full border rounded-md p-2"
+							value={filters.viewAll ? "all" : "mine"}
+							onChange={(e) =>
+								setFilters((prev) => ({
+									...prev,
+									viewAll: e.target.value === "all",
+								}))
+							}
+						>
+							<option value="mine">{t("orders.myOrders")}</option>
+							<option value="all">{t("orders.allOrders")}</option>
+						</select>
+					</div>
+				)}
 				<div className="flex-1">
 					<label className="block text-sm font-medium text-gray-700 mb-1">
 						{t("orders.startDate")}
@@ -242,6 +287,9 @@ const Orders = () => {
 		</Card>
 	);
 
+	/**
+	 * Render loading indicator.
+	 */
 	if (loading && page === 1) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -329,13 +377,17 @@ const Orders = () => {
 												>
 													<Download className="w-4 h-4" />
 												</button>
-												<button
-													onClick={() => navigate(`/orders/${order._id}/edit`)}
-													className="text-blue-600 hover:text-blue-700"
-													title={t("common.edit")}
-												>
-													<Edit className="w-4 h-4" />
-												</button>
+												{canEdit(order) && (
+													<button
+														onClick={() =>
+															navigate(`/orders/${order._id}/edit`)
+														}
+														className="text-blue-600 hover:text-blue-700"
+														title={t("common.edit")}
+													>
+														<Edit className="w-4 h-4" />
+													</button>
+												)}
 												{canDelete(order) && (
 													<button
 														onClick={() => handleDelete(order._id)}
